@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugin", "Plugin\Plugin.csproj", "{C385B338-068C-4761-8672-30027515A9FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Preloader", "Preloader\Preloader.csproj", "{E1DEFE92-93F7-4BC4-B415-B58873FF2EFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C385B338-068C-4761-8672-30027515A9FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C385B338-068C-4761-8672-30027515A9FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		//{E1DEFE92-93F7-4BC4-B415-B58873FF2EFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		//{E1DEFE92-93F7-4BC4-B415-B58873FF2EFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

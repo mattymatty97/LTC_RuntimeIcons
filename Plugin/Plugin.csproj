@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <RootNamespace>$(ModNameSpace)</RootNamespace>
+        <AssemblyName>$(ModName)</AssemblyName>
+        <Product>$(ModName)</Product>
+    </PropertyGroup>
+	
+    <PropertyGroup>
+        <!-- The mod directory to install our developement mod to. -->
+        <ModDirectory>$(ProfileDirectory)\BepInEx\plugins\0-$(Product)\</ModDirectory>
+        <!-- Where to create the temporary directory for creating the release zip files. -->
+        <ZipDir>$(SolutionDir)\Thunderstore\</ZipDir>
+        <!-- The internal structure of the zip file. -->
+        <ZipStructure>BepInEx\plugins\</ZipStructure>
+    </PropertyGroup>
+	
+    <ItemGroup>
+        <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.0.1"/>
+
+        <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
+        <!--<Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.Rocks.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\0Harmony.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.Harmony.dll"/>-->
+    </ItemGroup>
+	
+    <!-- Defining the reference files that have to be publicized. -->
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
+
+        <!-- Publicize directly when referencing -->
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp.dll" Publicize="true"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp-firstpass.dll" Publicize="true"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Runtime.dll" Publicize="true"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Components.dll" Publicize="true"/>
+        <!--<Reference Include="$(SolutionDir)\Dependencies\Assembly-CSharp.pdll" Publicize="true"/>-->
+
+        <!-- clean referencing -->
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.TextMeshPro.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.PhysicsModule.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ImageConversionModule.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ParticleSystemModule.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false"/>
+        <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false"/>
+        <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false"/>
+    </ItemGroup>
+	
+	<!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
+        <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
+    </Target>-->
+</Project>

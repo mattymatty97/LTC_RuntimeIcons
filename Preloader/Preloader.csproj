@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <RootNamespace>$(ModNameSpace).Preloader</RootNamespace>
+        <AssemblyName>$(ModName).Preloader</AssemblyName>
+        <Product>$(ModName)</Product>
+    </PropertyGroup>
+	
+    <PropertyGroup>
+        <!-- The mod directory to install our developement mod to. -->
+        <ModDirectory>$(ProfileDirectory)\BepInEx\patchers\0-$(Product)\</ModDirectory>
+        <!-- Where to create the temporary directory for creating the release zip files. -->
+        <ZipDir>$(SolutionDir)\Thunderstore\</ZipDir>
+        <!-- The internal structure of the zip file. -->
+        <ZipStructure>BepInEx\patchers\</ZipStructure>
+    </PropertyGroup>
+	
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
+        <!--<Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.Rocks.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\0Harmony.dll"/>
+        <Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.Harmony.dll"/>-->
+    </ItemGroup>
+	
+    <!-- Defining the reference files that have to be publicized. -->
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
+
+        <!-- Publicize directly when referencing -->
+
+        <!-- clean referencing -->
+    </ItemGroup>
+	
+	<!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
+        <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
+    </Target>-->
+</Project>

@@ -1,0 +1,96 @@
+<Project>
+
+    
+	<PropertyGroup>
+		<!-- Common Versioning and Module Information -->
+		<Version>1.0.0.0</Version>
+		<ModName>RuntimeIcons</ModName>
+		<ModGUID>mattymatty.RuntimeIcons</ModGUID>
+        <ModNameSpace>$(ModName)</ModNameSpace>
+		<AssemblyVersion>$(Version)</AssemblyVersion>
+		<FileVersion>$(Version)</FileVersion>
+		<InformationalVersion>$(Version)-beta</InformationalVersion>
+
+		<!-- Construct Assembly Title from ModName -->
+		<AssemblyTitle>$(ModName) - My Assembly Title</AssemblyTitle>
+		<AssemblyDescription>This is a sample assembly.</AssemblyDescription>
+
+		<!-- Assembly Metadata -->
+		<AssemblyConfiguration>Release</AssemblyConfiguration>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>Latest</LangVersion>
+		<Platforms>AnyCPU</Platforms>
+
+		<!-- License Information -->
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+	
+	<!-- Embedded Debug -->
+	<PropertyGroup>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>embedded</DebugType>
+		<PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+	</PropertyGroup>
+	
+	<!-- Suppress some Warnings -->
+	<PropertyGroup>
+		<NoWarn>1701;1702;CS0436</NoWarn>
+	</PropertyGroup>
+	
+	<!-- Defining the file names of project-specific data we'll load later. -->
+    <PropertyGroup>
+        <AssetTargetsFile>$(SolutionDir)\Assets.targets</AssetTargetsFile>
+        <GameDirTargetsFile>$(SolutionDir)\GameDirectory.targets</GameDirTargetsFile>
+        <GameDirTargetsFullPath>$(ProjectDir)$(GameDirTargetsFile)</GameDirTargetsFullPath>
+    </PropertyGroup>
+	
+	<!-- Ensure the relative paths exist!. -->
+    <Target Name="EnsureGameDirectoryDefined" BeforeTargets="PrepareForBuild">
+        <PropertyGroup>
+            <TargetsGameDirError>This project requires you to define your own game installation directory in a separate $(GameDirTargetsFile) file. Create this file in the same folder as the $(MSBuildProjectFile) and add a 'GameDirectory' MSBuild property to it to proceed. There is an example file in $(MSBuildThisFileDirectory) you can copy and adjust.</TargetsGameDirError>
+        </PropertyGroup>
+        <Error Condition="!Exists('$(GameDirTargetsFullPath)')" Text="$(TargetsGameDirError)"/>
+    </Target>
+	
+	<!-- Import extra information from project-specific files. -->
+    <Import Project="$(ProjectDir)$(AssetTargetsFile)" Condition="Exists('$(ProjectDir)$(AssetTargetsFile)')"/>
+    <!-- This import isn't actually optional, but making it conditional allows the user-friendly error task above to run. -->
+    <Import Project="$(GameDirTargetsFullPath)" Condition="Exists('$(GameDirTargetsFullPath)')"/>
+	
+    <!-- Ensure that the defined Game directory path is valid. -->
+    <Target Name="EnsureGameDirectoryExists" AfterTargets="EnsureGameDirectoryDefined">
+        <PropertyGroup>
+            <GameDirectoryError>The path specified in $(GameDirTargetsFile) for 'GameDirectory' does not exist!</GameDirectoryError>
+        </PropertyGroup>
+        <Error Condition="!Exists('$(GameDirectory)')" Text="$(GameDirectoryError)"/>
+    </Target>
+    <!-- Ensure that the defined Profile directory path is valid. -->
+    <Target Condition="'$(ProfileDirectory)' != ''" Name="EnsureGameDirectoryExists" AfterTargets="EnsureGameDirectoryDefined">
+        <PropertyGroup>
+            <ProfileDirectoryError>The path specified in $(GameDirTargetsFile) for 'ProfileDirectory' does not exist!</ProfileDirectoryError>
+        </PropertyGroup>
+        <Error Condition="!Exists('$(ProfileDirectory)')" Text="$(ProfileDirectoryError)"/>
+    </Target>
+	
+	<!-- Copy newly built files to the game directory. -->
+    <Target Condition="Exists('$(ProfileDirectory)')" Name="CopyToGameFolder" AfterTargets="Build">
+        <Message Importance="high" Text="Copying files to game directory."/>
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModDirectory)"/>
+        <Copy SourceFiles="@(Assets)" DestinationFolder="$(ModDirectory)%(Assets.RelativeDir)"/>
+    </Target>
+	
+	<!-- Automatically create the zip folder structure, ready for distribution. -->
+    <Target Name="MoveToOutput" AfterTargets="Build" Condition="$(Configuration.Contains('Release'))">
+        <Message Importance="high" Text="Copying files to output directory"/>
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ZipDir)$(ZipStructure)"/>
+        <Copy SourceFiles="@(Assets)" DestinationFolder="$(ZipDir)$(ZipStructure)%(Assets.RelativeDir)"/>
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="*"/>
+    </ItemGroup>
+    <PropertyGroup>
+        <BepInExPluginGuid>$(ModGUID)</BepInExPluginGuid>
+        <BepInExPluginName>$(ModName)</BepInExPluginName>
+    </PropertyGroup>
+</Project>
