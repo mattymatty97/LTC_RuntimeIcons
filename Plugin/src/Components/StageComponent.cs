@@ -76,14 +76,14 @@ public class StageComponent : MonoBehaviour
             {
                 transform.Rotate(camera.transform.right, -75, Space.World);
 
-                if (bounds.extents.z < bounds.extents.x / 2)
+                if (bounds.extents.z < bounds.extents.x / 2 || bounds.extents.x < bounds.extents.z / 2)
                     transform.Rotate(camera.transform.forward, -45, Space.World);
             }
             else
             {
                 transform.Rotate(camera.transform.right, -25, Space.World);
 
-                if (bounds.extents.y < bounds.extents.x / 2)
+                if (bounds.extents.y < bounds.extents.x / 2 || bounds.extents.x < bounds.extents.y / 2)
                     transform.Rotate(camera.transform.forward, -45, Space.World);
             }
         }
