@@ -217,6 +217,7 @@ public class SnapshotCamera : MonoBehaviour {
         private Quaternion rotation;
         private Vector3 scale;
         private Dictionary<GameObject, int> layers;
+        private Dictionary<Material, Shader> shaders;
 
         /// <summary>
         /// Store the current state (layers, position, rotation, and scale) of a GameObject
@@ -234,6 +235,15 @@ public class SnapshotCamera : MonoBehaviour {
             {
                 this.layers.Add(t.gameObject, t.gameObject.layer);
             }
+
+            this.shaders = new Dictionary<Material, Shader>();
+            foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>(true))
+            {
+                foreach (Material m in r.sharedMaterials)
+                {
+                    this.shaders.TryAdd(m, m.shader);
+                }
+            }
         }
 
         /// <summary>
@@ -248,6 +258,11 @@ public class SnapshotCamera : MonoBehaviour {
             foreach (KeyValuePair<GameObject, int> entry in this.layers)
             {
                 entry.Key.layer = entry.Value;
+            }
+
+            foreach (KeyValuePair<Material, Shader> entry in this.shaders)
+            {
+                entry.Key.shader = entry.Value;
             }
         }
     }
@@ -268,6 +283,19 @@ public class SnapshotCamera : MonoBehaviour {
         gameObject.transform.rotation = rotation;
         gameObject.transform.localScale = scale;
         //SetLayersRecursively(gameObject);
+
+        Shader shader = null;
+        foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>(true))
+        {
+            foreach (Material m in r.sharedMaterials)
+            {
+                if (m.shader.name == "HDRP/Lit")
+                {
+                    shader ??= Shader.Find("HDRP/Lit");
+                    m.shader = shader;
+                }
+            }
+        }
 
         return goss;
     }
