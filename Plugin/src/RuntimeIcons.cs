@@ -48,7 +48,7 @@ namespace RuntimeIcons
 				
 				Log.LogInfo("Preparing SnapshotCamera");
 
-				SnapshotCamera = SnapshotCamera.MakeSnapshotCamera("Props");
+				SnapshotCamera = SnapshotCamera.MakeSnapshotCamera(LayerMask.GetMask("Props", "Default"));
 				
 				SnapshotCamera.gameObject.hideFlags |= HideFlags.HideAndDontSave;
 				DontDestroyOnLoad(SnapshotCamera.gameObject);

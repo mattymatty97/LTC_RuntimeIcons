@@ -39,9 +39,9 @@ public class SnapshotCamera : MonoBehaviour {
     /// </summary>
     internal GameObject lightGo { get; private set; }
     /// <summary>
-    /// The layer on which the SnapshotCamera takes snapshots.
+    /// The layermask on which the SnapshotCamera takes snapshots.
     /// </summary>
-    internal int layer { get; private set; }
+    internal int layerMask { get; private set; }
 #pragma warning restore 0649
 
     /// <summary>
@@ -63,25 +63,11 @@ public class SnapshotCamera : MonoBehaviour {
     /// <summary>
     /// Factory method which sets up and configures a new SnapshotCamera, then returns it.
     /// </summary>
-    /// <param name="layer">The name of the layer on which to take snapshots.</param>
-    /// <param name="name">The name that will be given to the new GameObject the SnapshotCamera will be attached to.</param>
-    /// <returns>A new SnapshotCamera, ready for use.</returns>
-    public static SnapshotCamera MakeSnapshotCamera (string layer, string name = "Snapshot Camera")
-    {
-        return MakeSnapshotCamera(LayerMask.NameToLayer(layer), name);
-    }
-
-    /// <summary>
-    /// Factory method which sets up and configures a new SnapshotCamera, then returns it.
-    /// </summary>
     /// <param name="layer">The layer number of the layer on which to take snapshots.</param>
     /// <param name="name">The name that will be given to the new GameObject the SnapshotCamera will be attached to.</param>
     /// <returns>A new SnapshotCamera, ready for use.</returns>
-    public static SnapshotCamera MakeSnapshotCamera (int layer = 5, string name = "Snapshot Camera")
+    public static SnapshotCamera MakeSnapshotCamera (int layerMask = 1, string name = "Snapshot Camera")
     {
-        if (layer < 0 || layer > 31)
-            throw new ArgumentOutOfRangeException(nameof(layer), "layer argument must specify a valid layer between 0 and 31");
-
         // Create a new GameObject to hold the camera
         GameObject snapshotCameraGO = new GameObject(name);
         
@@ -92,7 +78,7 @@ public class SnapshotCamera : MonoBehaviour {
         Camera cam = cameraGO.AddComponent<Camera>();
 
         // Configure the Camera
-        cam.cullingMask = 1 << layer;
+        cam.cullingMask = layerMask;
         cam.orthographic = true;
         cam.orthographicSize = 1;
         cam.clearFlags = CameraClearFlags.SolidColor;
@@ -123,12 +109,10 @@ public class SnapshotCamera : MonoBehaviour {
         
         GameObject lightGO = new GameObject("SpotLight");
         lightGO.transform.parent = snapshotCameraGO.transform;
-        lightGO.layer = layer;
         lightGO.SetActive(false);
         
         GameObject lightGO1 = new GameObject("SpotLight1");
         lightGO1.transform.parent = lightGO.transform;
-        lightGO1.layer = layer;
         lightGO1.transform.localPosition = new Vector3(0, 4, 0);
         lightGO1.transform.rotation = Quaternion.LookRotation(Vector3.down);
         
@@ -171,7 +155,7 @@ public class SnapshotCamera : MonoBehaviour {
         snapshotCamera.camData = camData;
         snapshotCamera.camPass = customPass;
         snapshotCamera.lightGo = lightGO;
-        snapshotCamera.layer = layer;
+        snapshotCamera.layerMask = layerMask;
 
         // Return the SnapshotCamera
         return snapshotCamera;
@@ -269,16 +253,6 @@ public class SnapshotCamera : MonoBehaviour {
     }
 
     /// <summary>
-    /// Set the layers of the GameObject and all its children to the SnapshotCamera's snapshot layer so the SnapshotCamera can see it.
-    /// </summary>
-    /// <param name="gameObject">The GameObject apply the layer modifications to.</param>
-    private void SetLayersRecursively (GameObject gameObject)
-    {
-        foreach (Transform transform in gameObject.GetComponentsInChildren<Transform>(true))
-            transform.gameObject.layer = layer;
-    }
-
-    /// <summary>
     /// Prepares an instantiated GameObject for taking a snapshot by setting its layers and applying the specified position offset, rotation, and scale to it.
     /// </summary>
     /// <param name="prefab">The instantiated GameObject to prepare.</param>
@@ -310,7 +284,6 @@ public class SnapshotCamera : MonoBehaviour {
     {
         GameObject gameObject = GameObject.Instantiate(prefab, transform.position + positionOffset, rotation) as GameObject;
         gameObject.transform.localScale = scale;
-        SetLayersRecursively(gameObject);
 
         return gameObject;
     }
