@@ -70,8 +70,10 @@ public class SnapshotCamera : MonoBehaviour {
     {
         // Create a new GameObject to hold the camera
         GameObject snapshotCameraGO = new GameObject(name);
+        snapshotCameraGO.hideFlags |= HideFlags.HideAndDontSave;
         
         GameObject cameraGO = new GameObject("Camera");
+        cameraGO.hideFlags |= HideFlags.HideAndDontSave;
         cameraGO.transform.parent = snapshotCameraGO.transform;
         //cameraGO.SetActive(true);
         // Add a Camera component to the GameObject
@@ -107,11 +109,13 @@ public class SnapshotCamera : MonoBehaviour {
         customPass.targetDepthBuffer = CustomPass.TargetBuffer.Custom;
         customPass.clearFlags = UnityEngine.Rendering.ClearFlag.All;
         
-        GameObject lightGO = new GameObject("SpotLight");
+        GameObject lightGO = new GameObject("Lights");
+        lightGO.hideFlags |= HideFlags.HideAndDontSave;
         lightGO.transform.parent = snapshotCameraGO.transform;
         lightGO.SetActive(false);
         
         GameObject lightGO1 = new GameObject("SpotLight1");
+        lightGO1.hideFlags |= HideFlags.HideAndDontSave;
         lightGO1.transform.parent = lightGO.transform;
         lightGO1.transform.localPosition = new Vector3(0, 4, 0);
         lightGO1.transform.rotation = Quaternion.LookRotation(-cam.transform.up);
@@ -144,6 +148,7 @@ public class SnapshotCamera : MonoBehaviour {
         
         GameObject lightGO2 = Instantiate(lightGO1, lightGO.transform);
         lightGO2.name = "SpotLight 2";
+        lightGO2.hideFlags |= HideFlags.HideAndDontSave;
         lightGO2.transform.localPosition = new Vector3(0, 0, -4);
         lightGO2.transform.rotation = Quaternion.LookRotation(cam.transform.forward);
         
