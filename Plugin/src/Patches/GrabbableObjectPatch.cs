@@ -12,12 +12,21 @@ namespace RuntimeIcons.Patches;
 internal class GrabbableObjectPatch
 {
 
+    private static Sprite BrokenSrpite;
+    
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
     private static void AfterStart(GrabbableObject __instance)
     {
-        if (__instance.itemProperties.itemIcon.name != "ScrapItemIcon2") 
+        if (__instance.itemProperties.itemIcon.name != "ScrapItemIcon" &&
+            __instance.itemProperties.itemIcon.name != "ScrapItemIcon2") 
             return;
+
+        if (!BrokenSrpite)
+        {
+            BrokenSrpite = UnityEngine.Object.Instantiate(__instance.itemProperties.itemIcon);
+            BrokenSrpite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
+        }
         
         if (RuntimeIcons.PluginConfig.Blacklist.Contains(__instance.itemProperties.itemName))
             return;
@@ -48,7 +57,7 @@ internal class GrabbableObjectPatch
                         UnityEngine.Object.Destroy(texture);
                         RuntimeIcons.Log.LogError($"Expected Icon {filename} has the wrong format!");
                     }
-                    else
+                    else if (!IsTransparent(texture))
                     {
                         var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
                             new Vector2(texture.width / 2f, texture.height / 2f));
@@ -84,14 +93,31 @@ internal class GrabbableObjectPatch
             SnapshotCamera.SavePNG(texture, $"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 BepInEx.Paths.CachePath);
 
-            var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
-                new Vector2(texture.width / 2f, texture.height / 2f));
-            sprite.name = $"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}";
-            grabbableObject.itemProperties.itemIcon = sprite;
+            if (!IsTransparent(texture))
+            {
+                var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
+                    new Vector2(texture.width / 2f, texture.height / 2f));
+                sprite.name = $"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}";
+                grabbableObject.itemProperties.itemIcon = sprite;
+            }
+            else
+            {
+                RuntimeIcons.Log.LogError($"{grabbableObject.itemProperties.itemName} Generated Empty Sprite!");
+                grabbableObject.itemProperties.itemIcon = BrokenSrpite;
+            }
         }
         finally
         {
             RuntimeIcons.CameraStage.ResetStage();
         }
+    }
+    
+    public static bool IsTransparent(Texture2D tex)
+    {
+        for (var x = 0; x < tex.width; x++)
+        for (var y = 0; y < tex.height; y++)
+            if (tex.GetPixel(x, y).a != 0)
+                return false;
+        return true;
     }
 }
