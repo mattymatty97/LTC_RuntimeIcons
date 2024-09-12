@@ -114,7 +114,7 @@ public class SnapshotCamera : MonoBehaviour {
         GameObject lightGO1 = new GameObject("SpotLight1");
         lightGO1.transform.parent = lightGO.transform;
         lightGO1.transform.localPosition = new Vector3(0, 4, 0);
-        lightGO1.transform.rotation = Quaternion.LookRotation(Vector3.down);
+        lightGO1.transform.rotation = Quaternion.LookRotation(-cam.transform.up);
         
         Light light = lightGO1.AddComponent<Light>();
         light.type = LightType.Spot;
@@ -142,7 +142,7 @@ public class SnapshotCamera : MonoBehaviour {
         lightData.intensity = 1295.433f;
         
         
-        GameObject lightGO2 = Object.Instantiate(lightGO1, lightGO.transform);
+        GameObject lightGO2 = Instantiate(lightGO1, lightGO.transform);
         lightGO2.name = "SpotLight 2";
         lightGO2.transform.localPosition = new Vector3(0, 0, -4);
         lightGO2.transform.rotation = Quaternion.LookRotation(cam.transform.forward);
@@ -352,9 +352,9 @@ public class SnapshotCamera : MonoBehaviour {
     {
         if (gameObject == null)
             throw new ArgumentNullException("gameObject");
-        else if (gameObject.scene.name == null)
+        /*else if (gameObject.scene.name == null)
             throw new ArgumentException("gameObject parameter must be an instantiated GameObject! If you want to use a prefab directly, use TakePrefabSnapshot instead.", "gameObject");
-        
+        */
         // Prepare the gameObject and save its current state so we can restore it later
         GameObjectStateSnapshot previousState = PrepareObject(gameObject, positionOffset, rotation, scale);
         

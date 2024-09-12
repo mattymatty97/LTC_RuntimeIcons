@@ -31,23 +31,26 @@
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
 
         <!-- Publicize directly when referencing -->
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp.dll" Publicize="true"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp-firstpass.dll" Publicize="true"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Runtime.dll" Publicize="true"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Components.dll" Publicize="true"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp.dll" Publicize="true" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp-firstpass.dll" Publicize="true" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Runtime.dll" Publicize="true" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Components.dll" Publicize="true" Private="False"/>
         <!--<Reference Include="$(SolutionDir)\Dependencies\Assembly-CSharp.pdll" Publicize="true"/>-->
 
         <!-- clean referencing -->
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.TextMeshPro.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.PhysicsModule.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ImageConversionModule.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ParticleSystemModule.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Publicize="false"/>
-        <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false"/>
-        <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.TextMeshPro.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.PhysicsModule.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ImageConversionModule.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ParticleSystemModule.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false" Private="False"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="src\Utils\" />
     </ItemGroup>
 	
 	<!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
