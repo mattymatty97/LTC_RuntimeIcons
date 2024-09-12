@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.Rendering.RendererUtils;
 using Object = UnityEngine.Object;
 
 namespace RuntimeIcons.Components;
@@ -31,6 +32,8 @@ public class SnapshotCamera : MonoBehaviour {
     /// </summary>
     internal Camera cam { get; private set; }
     internal HDAdditionalCameraData camData { get; private set; }
+    
+    internal CustomPassThing camPass { get; private set; }
     /// <summary>
     /// The Light used internally by the SnapshotCamera.
     /// </summary>
@@ -39,8 +42,6 @@ public class SnapshotCamera : MonoBehaviour {
     /// The layer on which the SnapshotCamera takes snapshots.
     /// </summary>
     internal int layer { get; private set; }
-
-    internal RenderData data { get; } = new RenderData();
 #pragma warning restore 0649
 
     /// <summary>
@@ -86,6 +87,7 @@ public class SnapshotCamera : MonoBehaviour {
         
         GameObject cameraGO = new GameObject("Camera");
         cameraGO.transform.parent = snapshotCameraGO.transform;
+        //cameraGO.SetActive(true);
         // Add a Camera component to the GameObject
         Camera cam = cameraGO.AddComponent<Camera>();
 
@@ -99,21 +101,26 @@ public class SnapshotCamera : MonoBehaviour {
         cam.farClipPlane = 10f;
         cam.enabled = false;
         
-        
         // Add a Camera component to the GameObject
         HDAdditionalCameraData camData = cameraGO.AddComponent<HDAdditionalCameraData>();
 
         camData.clearDepth = true;
         camData.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
         camData.backgroundColorHDR = Color.clear;
-        camData.customRender += CustomRender;
+
+        CustomPassVolume customPassVolume = cameraGO.AddComponent<CustomPassVolume>();
+        customPassVolume.targetCamera = cam;
+        CustomPassThing customPass = (CustomPassThing)customPassVolume.AddPassOfType<CustomPassThing>();
+        customPass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
+        customPass.targetDepthBuffer = CustomPass.TargetBuffer.Custom;
+        customPass.clearFlags = UnityEngine.Rendering.ClearFlag.All;
         
         GameObject lightGO = new GameObject("SpotLight");
         lightGO.transform.parent = snapshotCameraGO.transform;
         lightGO.layer = layer;
         lightGO.SetActive(false);
         
-        GameObject lightGO1 = new GameObject("SpotLight");
+        GameObject lightGO1 = new GameObject("SpotLight1");
         lightGO1.transform.parent = lightGO.transform;
         lightGO1.layer = layer;
         lightGO1.transform.localPosition = new Vector3(0, 4, 0);
@@ -146,6 +153,7 @@ public class SnapshotCamera : MonoBehaviour {
         
         
         GameObject lightGO2 = Object.Instantiate(lightGO1, lightGO.transform);
+        lightGO2.name = "SpotLight 2";
         lightGO2.transform.localPosition = new Vector3(0, 0, -4);
         lightGO2.transform.rotation = Quaternion.LookRotation(cam.transform.forward);
         
@@ -155,73 +163,12 @@ public class SnapshotCamera : MonoBehaviour {
         // Set the SnapshotCamera's cam and layer fields
         snapshotCamera.cam = cam;
         snapshotCamera.camData = camData;
+        snapshotCamera.camPass = customPass;
         snapshotCamera.lightGo = lightGO;
         snapshotCamera.layer = layer;
 
         // Return the SnapshotCamera
         return snapshotCamera;
-        
-        
-        void CustomRender(ScriptableRenderContext context, HDCamera hd)
-        {
-            var camera = hd.camera;
-
-            // Ensure the camera has culling parameters
-            if (camera.TryGetCullingParameters(out var culling))
-            {
-                // Perform culling
-                var cull = context.Cull(ref culling);
-
-                // Set up HDRP's rendering features
-                using (var cmd = new CommandBuffer())
-                {
-                    cmd.name = "Clear and Render";
-                    cmd.ClearRenderTarget(true, true, Color.clear);
-                    context.ExecuteCommandBuffer(cmd);
-                    cmd.Clear();
-                }
-
-                // Set up camera properties
-                context.SetupCameraProperties(camera);
-
-                var sortingSettings = new SortingSettings(camera)
-                {
-                    criteria = SortingCriteria.CommonTransparent
-                };
-                
-                // Define DrawingSettings with proper shader passes
-                DrawingSettings drawingSettings = new DrawingSettings(
-                    HDShaderPassNames.s_ForwardName,
-                    sortingSettings
-                )
-                {
-                    perObjectData = PerObjectData.LightProbe | PerObjectData.ReflectionProbes | 
-                                    PerObjectData.Lightmaps | PerObjectData.ShadowMask | 
-                                    PerObjectData.MotionVectors | PerObjectData.LightData | 
-                                    PerObjectData.LightIndices | PerObjectData.OcclusionProbe |
-                                    PerObjectData.ReflectionProbeData | PerObjectData.LightProbeProxyVolume |
-                                    PerObjectData.OcclusionProbeProxyVolume
-                };
-
-                // Set shader passes
-                drawingSettings.SetShaderPassName(0, HDShaderPassNames.s_DepthOnlyName); // Depth pass
-                drawingSettings.SetShaderPassName(1, new ShaderTagId(HDShaderPassNames.s_ShadowCasterStr)); // Shadow caster
-                drawingSettings.SetShaderPassName(5, HDShaderPassNames.s_ForwardName); // Forward pass
-                drawingSettings.SetShaderPassName(6, HDShaderPassNames.s_ForwardOnlyName); // Forward only
-                drawingSettings.SetShaderPassName(7, HDShaderPassNames.s_SRPDefaultUnlitName); // Unlit pass
-                drawingSettings.SetShaderPassName(8, HDShaderPassNames.s_DecalMeshForwardEmissiveName); // Decal pass
-                drawingSettings.SetShaderPassName(9, HDShaderPassNames.s_TransparentDepthPrepassName); // Transparent depth prepass
-                drawingSettings.SetShaderPassName(10, HDShaderPassNames.s_TransparentBackfaceName); // Transparent backface
-                drawingSettings.SetShaderPassName(11, HDShaderPassNames.s_TransparentDepthPostpassName); // Transparent depth postpass
-
-                FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.all);
-                
-                context.DrawRenderers(cull, ref drawingSettings, ref filteringSettings);
-                
-            }
-            
-            context.Submit();
-        }
     }
 
     #region PNG saving
@@ -533,23 +480,24 @@ public class SnapshotCamera : MonoBehaviour {
     private Texture2D TakeSnapshot(Color backgroundColor, int width, int height)
     {
         lightGo.SetActive(true);
-        data.width = width;
-        data.height = height;
         // Set the background color of the camera
         cam.backgroundColor = backgroundColor;
 
         // Get a temporary render texture and render the camera
-        cam.targetTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+        var tempTexture = RenderTexture.GetTemporary(width, height, 8, RenderTextureFormat.ARGB32);
+        var tempTexture2 = RenderTexture.GetTemporary(width, height, 8, RenderTextureFormat.ARGB32);
+        cam.targetTexture = tempTexture2;
+        camPass.targetTexture = tempTexture;
         cam.Render();
         
         // Activate the temporary render texture
         RenderTexture previouslyActiveRenderTexture = RenderTexture.active;
-        RenderTexture.active = cam.targetTexture;
+        RenderTexture.active = tempTexture;
         
         // Extract the image into a new texture without mipmaps
-        Texture2D texture = new Texture2D(cam.targetTexture.width, cam.targetTexture.height, TextureFormat.ARGB32,  -1,false);
+        Texture2D texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.ARGB32,  -1,false);
         
-        texture.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
+        texture.ReadPixels(new Rect(0, 0, tempTexture.width, tempTexture.height), 0, 0);
         texture.Apply();
         
         // Reactivate the previously active render texture
@@ -557,19 +505,13 @@ public class SnapshotCamera : MonoBehaviour {
         
         // Clean up after ourselves
         cam.targetTexture = null;
-        RenderTexture.ReleaseTemporary(cam.targetTexture);
+        RenderTexture.ReleaseTemporary(tempTexture2);
+        camPass.targetTexture = null;
+        RenderTexture.ReleaseTemporary(tempTexture);
 
         lightGo.SetActive(false);
         
         // Return the texture
         return texture;
-    }
-
-    public class RenderData
-    {
-        public int width { get; protected internal set; }
-        public int height { get; protected internal set; }
-        
-        public RenderTexture outputTexture { get; internal set; }
     }
 }

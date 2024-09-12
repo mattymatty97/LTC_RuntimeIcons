@@ -45,6 +45,7 @@
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ImageConversionModule.dll" Publicize="false"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ParticleSystemModule.dll" Publicize="false"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false"/>
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Publicize="false"/>
         <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false"/>
         <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false"/>
     </ItemGroup>
