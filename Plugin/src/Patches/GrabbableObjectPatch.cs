@@ -19,7 +19,7 @@ internal class GrabbableObjectPatch
         {
             RuntimeIcons.Log.LogInfo($"Computing {__instance.itemProperties.itemName} icon");
 
-            var rotation = Quaternion.Euler(__instance.itemProperties.restingRotation.x, __instance.itemProperties.floorYOffset, __instance.itemProperties.restingRotation.z) * Quaternion.Euler(-25, 45, 0);
+            var rotation = Quaternion.Euler(__instance.itemProperties.restingRotation.x, __instance.itemProperties.floorYOffset, __instance.itemProperties.restingRotation.z) * Quaternion.Euler(-25, 0, 0);
             //var rotation = Quaternion.Euler(__instance.itemProperties.rotationOffset);
             
             (float scaleFactor, Vector3 offset) =

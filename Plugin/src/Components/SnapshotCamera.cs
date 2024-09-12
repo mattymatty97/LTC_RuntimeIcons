@@ -107,6 +107,12 @@ public class SnapshotCamera : MonoBehaviour {
         camData.clearDepth = true;
         camData.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
         camData.backgroundColorHDR = Color.clear;
+        camData.customRenderingSettings = true;
+        camData.customRenderingSettings = true;
+        var overrideMask = camData.renderingPathCustomFrameSettingsOverrideMask;
+        overrideMask.mask[(uint)FrameSettingsField.DecalLayers] = true;
+        camData.renderingPathCustomFrameSettingsOverrideMask = overrideMask;
+        camData.renderingPathCustomFrameSettings.SetEnabled(FrameSettingsField.DecalLayers, false);
 
         CustomPassVolume customPassVolume = cameraGO.AddComponent<CustomPassVolume>();
         customPassVolume.targetCamera = cam;
