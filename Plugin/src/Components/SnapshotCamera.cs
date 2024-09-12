@@ -139,7 +139,7 @@ public class SnapshotCamera : MonoBehaviour {
         lightData.distance = 150000000000;
         lightData.fadeDistance = 10000;
         lightData.innerSpotPercent = 82.7f;
-        lightData.intensity = 1295.433f;
+        lightData.intensity = 1000f;
         
         
         GameObject lightGO2 = Instantiate(lightGO1, lightGO.transform);

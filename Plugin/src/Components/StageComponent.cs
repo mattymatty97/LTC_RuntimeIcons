@@ -50,13 +50,52 @@ public class StageComponent : MonoBehaviour
 
     public void FindOptimalRotationForCamera(Camera camera)
     {
-        transform.Rotate(camera.transform.up, -45, Space.World);
-        transform.Rotate(camera.transform.right, -25, Space.World);
+        if (StagedObject == null)
+            throw new InvalidOperationException("No Object on stage!");
+        
+
+        if (RuntimeIcons.PluginConfig.RotationOverrides.TryGetValue(StagedObject.itemProperties.itemName,
+                out var rotations))
+        {
+            transform.Rotate(rotations, Space.World);
+        }
+        else
+        {
+            transform.Rotate(camera.transform.up, -StagedObject.itemProperties.rotationOffset.y, Space.World);
+            if (StagedObject.itemProperties.twoHandedAnimation)
+                transform.Rotate(camera.transform.up, -135, Space.World);
+
+            var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, Vector3.one);
+            if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(gameObject, out var bounds, matrix))
+                throw new InvalidOperationException("This object has no Renders!");
+
+            if (bounds.size == Vector3.zero)
+                throw new InvalidOperationException("This object has no Bounds!");
+
+            if (bounds.extents.y < Mathf.Max(bounds.extents.x, bounds.extents.z) / 3)
+            {
+                transform.Rotate(camera.transform.right, -75, Space.World);
+
+                if (bounds.extents.z < bounds.extents.x / 2)
+                    transform.Rotate(camera.transform.forward, -45, Space.World);
+            }
+            else
+            {
+                transform.Rotate(camera.transform.right, -25, Space.World);
+
+                if (bounds.extents.y < bounds.extents.x / 2)
+                    transform.Rotate(camera.transform.forward, -45, Space.World);
+            }
+        }
+
         RuntimeIcons.Log.LogInfo($"Stage rotation {transform.localRotation.eulerAngles}");
     }
 
     public void FindOptimalOffsetAndScaleForCamera(Camera camera, Vector2 targetPixelArea)
     {
+        if (StagedObject == null)
+            throw new InvalidOperationException("No Object on stage!");
+        
         var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, Vector3.one);
         if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(gameObject, out var bounds, matrix))
             throw new InvalidOperationException("This object has no Renders!");
@@ -82,7 +121,7 @@ public class StageComponent : MonoBehaviour
         var scaledCenter = Vector3.Scale(bounds.center, scale);
 
         // Calculate the desired Z position to prevent clipping
-        var distanceToMove = scaledSize.z + camera.nearClipPlane;
+        var distanceToMove = Mathf.Max(scaledSize.z + camera.nearClipPlane, 1f);
 
         // Calculate the offset in the camera's local space
         var localOffset = new Vector3(-scaledCenter.x, -scaledCenter.y, distanceToMove);
