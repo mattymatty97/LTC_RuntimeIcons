@@ -352,9 +352,9 @@ public class SnapshotCamera : MonoBehaviour {
     {
         if (gameObject == null)
             throw new ArgumentNullException("gameObject");
-        /*else if (gameObject.scene.name == null)
+        else if (gameObject.scene.name == null && gameObject.transform.parent != transform)
             throw new ArgumentException("gameObject parameter must be an instantiated GameObject! If you want to use a prefab directly, use TakePrefabSnapshot instead.", "gameObject");
-        */
+        
         // Prepare the gameObject and save its current state so we can restore it later
         GameObjectStateSnapshot previousState = PrepareObject(gameObject, positionOffset, rotation, scale);
         
