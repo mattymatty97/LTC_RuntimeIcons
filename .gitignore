@@ -1,4 +1,5 @@
 .idea
+.vs
 *.user
 packages
 **/bin
