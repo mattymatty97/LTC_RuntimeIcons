@@ -28,7 +28,7 @@ internal class GrabbableObjectPatch
             BrokenSrpite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
         }
         
-        if (RuntimeIcons.PluginConfig.Blacklist.Contains(__instance.itemProperties.itemName))
+        if (PluginConfig.Blacklist.Contains(__instance.itemProperties.itemName))
             return;
             
         ComputeSprite(__instance);
@@ -39,7 +39,7 @@ internal class GrabbableObjectPatch
     {
         RuntimeIcons.Log.LogWarning($"Computing {grabbableObject.itemProperties.itemName} icon");
 
-        if (RuntimeIcons.PluginConfig.FileOverrides.TryGetValue(grabbableObject.itemProperties.itemName,
+        if (PluginConfig.FileOverrides.TryGetValue(grabbableObject.itemProperties.itemName,
                 out var filename))
         {
             

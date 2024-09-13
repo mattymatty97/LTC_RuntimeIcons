@@ -54,7 +54,7 @@ public class StageComponent : MonoBehaviour
             throw new InvalidOperationException("No Object on stage!");
         
 
-        if (RuntimeIcons.PluginConfig.RotationOverrides.TryGetValue(StagedObject.itemProperties.itemName,
+        if (PluginConfig.RotationOverrides.TryGetValue(StagedObject.itemProperties.itemName,
                 out var rotations))
         {
             transform.Rotate(rotations, Space.World);
