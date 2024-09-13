@@ -57,6 +57,9 @@ public class SnapshotCamera : MonoBehaviour {
     /// </summary>
     public Vector3 defaultScale = new Vector3(1, 1, 1);
 
+    private Shader _litShader = Shader.Find("HDRP/Lit");
+    private int _surfaceTypeProperty = Shader.PropertyToID("_SurfaceType");
+
     // This private constructor serves to ensure only the factory can produce new instances.
     private SnapshotCamera () { }
 
@@ -221,8 +224,8 @@ public class SnapshotCamera : MonoBehaviour {
         private Vector3 position;
         private Quaternion rotation;
         private Vector3 scale;
-        /*private Dictionary<GameObject, int> layers;
-        private Dictionary<Material, Shader> shaders;*/
+        //private Dictionary<GameObject, int> layers;
+        //private Dictionary<Renderer, Material[]> materials;
 
         /// <summary>
         /// Store the current state (layers, position, rotation, and scale) of a GameObject
@@ -241,12 +244,12 @@ public class SnapshotCamera : MonoBehaviour {
                 this.layers.Add(t.gameObject, t.gameObject.layer);
             }
 
-            this.shaders = new Dictionary<Material, Shader>();
+            this.materials = new Dictionary<Renderer, Material[]>();
             foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>(true))
             {
-                foreach (Material m in r.sharedMaterials)
+                if (!materials.TryAdd(r, r.sharedMaterials))
                 {
-                    this.shaders.TryAdd(m, m.shader);
+                    RuntimeIcons.Log.LogInfo($"Duplicate Renderers in children of {gameObject}");
                 }
             }*/
         }
@@ -265,9 +268,9 @@ public class SnapshotCamera : MonoBehaviour {
                 entry.Key.layer = entry.Value;
             }
 
-            foreach (KeyValuePair<Material, Shader> entry in this.shaders)
+            foreach (KeyValuePair<Renderer, Material[]> entry in this.materials)
             {
-                entry.Key.shader = entry.Value;
+                entry.Key.sharedMaterials = entry.Value;
             }*/
         }
     }
@@ -289,17 +292,26 @@ public class SnapshotCamera : MonoBehaviour {
         gameObject.transform.localScale = scale;
         //SetLayersRecursively(gameObject);
 
-        /*Shader shader = null;
-        foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>(true))
+        /*foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>(true))
         {
-            foreach (Material m in r.sharedMaterials)
+            var materials = r.sharedMaterials;
+            for (int i = 0; i < materials.Length; i++)
             {
-                if (m.shader.name == "HDRP/Lit" && m.shader.)
+                var material = materials[i];
+                // If a material is using the HDRP/Lit shader and is opaque, then it may be built by a mod
+                // without both the normal Deferred variant as well as the Forward variant that we need for
+                // our custom pass.
+                // Replacing the shader with the built-in HDRP/Lit shader instead of a bundled one will solve
+                // this issue.
+                if (material.shader.name == "HDRP/Lit" && material.GetFloat(_surfaceTypeProperty) == 0)
                 {
-                    shader ??= Shader.Find("HDRP/Lit");
-                    m.shader = shader;
+                    materials[i] = new Material(materials[i])
+                    {
+                        shader = _litShader,
+                    };
                 }
             }
+            r.sharedMaterials = materials;
         }*/
 
         return goss;
