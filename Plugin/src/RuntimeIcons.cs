@@ -48,7 +48,7 @@ namespace RuntimeIcons
                 
                 NewCameraStage = NewStageComponent.CreateStage(HideFlags.HideAndDontSave, LayerMask.GetMask("Default", "Player", "Water",
                     "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
-                    "MapHazards", "MiscLevelGeometry", "Terrain"), "New Stage");
+                    "MapHazards", "MiscLevelGeometry", "Terrain"), "Stage");
                 DontDestroyOnLoad(NewCameraStage.gameObject);
                 NewCameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
 

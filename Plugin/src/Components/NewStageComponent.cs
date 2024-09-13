@@ -193,6 +193,35 @@ public class NewStageComponent : MonoBehaviour
         RuntimeIcons.Log.LogInfo($"Stage Anchor offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
     }
 
+    public void SetObjectOnStage(GameObject gameObject)
+    {
+        SetObjectOnStage(gameObject.transform);
+    }
+    
+    public void SetObjectOnStage(Transform transform)
+    {
+        if (StagedTransform != null || StagedTransform != transform)
+            throw new InvalidOperationException("An Object is already on stage!");
+        
+        RuntimeIcons.Log.LogInfo($"Setting stage for {transform.name}");
+        
+        TargetTransform.localPosition = Vector3.zero;
+        TargetTransform.rotation = Quaternion.identity;
+        
+        StagedTransform = transform;
+        
+        var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, transform.localScale);
+        if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(transform.gameObject, out var bounds, matrix))
+            throw new InvalidOperationException("This object has no Renders!");
+
+        Memory = new TransformMemory(StagedTransform);
+        
+        StagedTransform.SetParent(TargetTransform, false);
+        StagedTransform.localPosition = -bounds.center;
+        
+        RuntimeIcons.Log.LogInfo($"Stage Anchor offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
+    }
+
     public void FindOptimalRotation()
     {
         if (StagedObject == null)
@@ -260,7 +289,7 @@ public class NewStageComponent : MonoBehaviour
 
     public void FindOptimalOffsetAndScale(Vector2 targetPixelArea)
     {
-        if (StagedObject == null)
+        if (StagedTransform == null)
             throw new InvalidOperationException("No Object on stage!");
         
         var matrix = Matrix4x4.TRS(Vector3.zero, TargetTransform.rotation, Vector3.one);
@@ -301,7 +330,7 @@ public class NewStageComponent : MonoBehaviour
 
     public void ResetStage()
     {
-        if (StagedObject != null)
+        if (StagedTransform != null)
         {
             StagedTransform.SetParent(Memory.Parent, false);
 
