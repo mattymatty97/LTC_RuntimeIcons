@@ -46,22 +46,6 @@ namespace RuntimeIcons
 
                 Log.LogInfo("Preparing SnapshotCamera");
                 
-                /*
-                SnapshotCamera = SnapshotCamera.MakeSnapshotCamera(LayerMask.GetMask("Default", "Player", "Water",
-                    "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
-                    "MapHazards", "MiscLevelGeometry", "Terrain"));
-
-                SnapshotCamera.gameObject.hideFlags |= HideFlags.HideAndDontSave;
-                DontDestroyOnLoad(SnapshotCamera.gameObject);
-                SnapshotCamera.gameObject.transform.position = new Vector3(1000, 1000, 0);
-
-                var stageObject = new GameObject("Stage")
-                {
-                    transform = { parent = SnapshotCamera.transform }
-                };
-                CameraStage = stageObject.AddComponent<StageComponent>();
-                */
-                
                 NewCameraStage = NewStageComponent.CreateStage(HideFlags.HideAndDontSave, LayerMask.GetMask("Default", "Player", "Water",
                     "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
                     "MapHazards", "MiscLevelGeometry", "Terrain"), "New Stage");

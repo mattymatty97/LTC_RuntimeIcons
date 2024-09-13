@@ -80,7 +80,7 @@ internal class GrabbableObjectPatch
 
         try
         {
-            RuntimeIcons.NewCameraStage.PrepareStageFor(grabbableObject);
+            RuntimeIcons.NewCameraStage.SetItemOnStage(grabbableObject);
 
             RuntimeIcons.NewCameraStage.FindOptimalRotation();
                 

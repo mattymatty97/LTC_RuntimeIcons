@@ -161,7 +161,7 @@ public class NewStageComponent : MonoBehaviour
         return stageComponent;
     }
 
-    public void PrepareStageFor(GrabbableObject grabbableObject)
+    public void SetItemOnStage(GrabbableObject grabbableObject)
     {
         if (StagedObject != null && StagedObject != grabbableObject)
             throw new InvalidOperationException("An Object is already on stage!");
@@ -178,6 +178,7 @@ public class NewStageComponent : MonoBehaviour
         StagedTransform = objectToAdjust.transform;
 
         var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset, grabbableObject.itemProperties.restingRotation.z);
+        //var rotation = Quaternion.Euler(grabbableObject.itemProperties.rotationOffset.x, grabbableObject.itemProperties.rotationOffset.y, grabbableObject.itemProperties.rotationOffset.z);
         
         var matrix = Matrix4x4.TRS(Vector3.zero, rotation, StagedTransform.localScale);
         if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(objectToAdjust, out var bounds, matrix))
@@ -205,9 +206,8 @@ public class NewStageComponent : MonoBehaviour
         }
         else
         {
-            TargetTransform.Rotate(_camera.transform.up, -StagedObject.itemProperties.rotationOffset.y, Space.World);
-            if (StagedObject.itemProperties.twoHandedAnimation)
-                TargetTransform.Rotate(_camera.transform.up, -135, Space.World);
+            //if (StagedObject.itemProperties.twoHandedAnimation)
+            //    TargetTransform.Rotate(_camera.transform.up, -135, Space.World);
 
             var matrix = Matrix4x4.TRS(Vector3.zero, TargetTransform.rotation, Vector3.one);
             if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(TargetGo, out var bounds, matrix))
@@ -216,19 +216,37 @@ public class NewStageComponent : MonoBehaviour
             if (bounds.size == Vector3.zero)
                 throw new InvalidOperationException("This object has no Bounds!");
 
-            if (bounds.extents.y < Mathf.Max(bounds.extents.x, bounds.extents.z) / 3)
+            if (bounds.extents.y < bounds.extents.x / 2f && bounds.extents.y <  bounds.extents.z / 2f)
             {
+                RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -75 x");
                 TargetTransform.Rotate(_camera.transform.right, -75, Space.World);
 
-                if (bounds.extents.z < bounds.extents.x / 2 || bounds.extents.x < bounds.extents.z / 2)
+                if (bounds.extents.z < bounds.extents.x)
+                {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 z");
                     TargetTransform.Rotate(_camera.transform.forward, -45, Space.World);
+                }
+                else if (bounds.extents.x < bounds.extents.z * 0.85f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 z");
+                    TargetTransform.Rotate(_camera.transform.forward, -45, Space.World);
+                }
             }
             else
             {
+                RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -25 x");
                 TargetTransform.Rotate(_camera.transform.right, -25, Space.World);
 
-                if (bounds.extents.y < bounds.extents.x / 2 || bounds.extents.x < bounds.extents.y / 2)
-                    TargetTransform.Rotate(_camera.transform.forward, -45, Space.World);
+                if (bounds.extents.x < bounds.extents.z * 0.85f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 y");
+                    TargetTransform.Rotate(_camera.transform.up, -45, Space.World);
+                }
+                else if (bounds.extents.y < bounds.extents.x / 2f || bounds.extents.x < bounds.extents.y / 2f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 45 z");
+                    TargetTransform.Rotate(_camera.transform.forward, 45, Space.World);
+                }
             }
         }
 
