@@ -13,17 +13,27 @@ namespace RuntimeIcons.Patches;
 internal class GrabbableObjectPatch
 {
 
-    private static Sprite BrokenSprite { get; set; }
+    internal static Sprite BrokenSprite { get; set; }
+
+    internal static bool ItemHasIcon(Item item)
+    {
+        if (item.itemIcon == null)
+            return false;
+        if (item.itemIcon.name == "ScrapItemIcon")
+            return false;
+        if (item.itemIcon.name == "ScrapItemIcon2")
+            return false;
+        return true;
+    }
     
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
     private static void AfterStart(GrabbableObject __instance)
     {
-        if (__instance.itemProperties.itemIcon.name != "ScrapItemIcon" &&
-            __instance.itemProperties.itemIcon.name != "ScrapItemIcon2") 
+        if (ItemHasIcon(__instance.itemProperties)) 
             return;
 
-        if (!BrokenSprite)
+        if (!BrokenSprite && __instance.itemProperties.itemIcon != null)
         {
             BrokenSprite = UnityEngine.Object.Instantiate(__instance.itemProperties.itemIcon);
             BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";

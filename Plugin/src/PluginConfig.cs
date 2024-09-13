@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -61,6 +62,69 @@ internal static class PluginConfig
                         return;
                             
                     GrabbableObjectPatch.ComputeSprite(StartOfRound.Instance.localPlayerController.currentlyHeldObjectServer);
+                });
+            LethalConfigProxy.AddButton("Debug", "Render All Loaded Items", "Finds all items in the resources of the game to render them. Must be in a game.", "Render All Items",
+                () =>
+                {
+                    if (StartOfRound.Instance == null)
+                        return;
+
+                    var items = Resources.FindObjectsOfTypeAll<Item>();
+                    var renderedItems = new HashSet<Item>();
+
+                    foreach (var item in items)
+                    {
+                        if (item.spawnPrefab == null)
+                            continue;
+
+                        var originalIcon = item.itemIcon;
+                        item.itemIcon = null;
+
+                        var spawnedItem = UnityEngine.Object.Instantiate(item.spawnPrefab);
+
+                        try
+                        {
+                            var grabbableObject = spawnedItem.GetComponentInChildren<GrabbableObject>();
+                            grabbableObject.Start();
+                        }
+                        catch { }
+                        finally
+                        {
+                            UnityEngine.Object.Destroy(spawnedItem);
+                        }
+
+                        if (item.itemIcon != null && item.itemIcon != GrabbableObjectPatch.BrokenSprite)
+                            renderedItems.Add(item);
+
+                        item.itemIcon = originalIcon;
+                    }
+
+                    var reportBuilder = new StringBuilder("Items that failed to render: ");
+                    var anyFailed = false;
+
+                    foreach (var item in items)
+                    {
+                        if (!renderedItems.Contains(item))
+                        {
+                            reportBuilder.Append(item.itemName);
+                            if (GrabbableObjectPatch.ItemHasIcon(item))
+                                reportBuilder.Append(" (✓)");
+                            else
+                                reportBuilder.Append(" (✗)");
+                            reportBuilder.Append(", ");
+                            anyFailed = true;
+                        }
+                    }
+
+                    if (anyFailed)
+                    {
+                        reportBuilder.Length -= 2;
+                        RuntimeIcons.Log.LogInfo(reportBuilder);
+                    }
+                    else
+                    {
+                        RuntimeIcons.Log.LogInfo("No items failed to render.");
+                    }
                 });
         }
                 
