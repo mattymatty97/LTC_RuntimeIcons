@@ -27,8 +27,9 @@ namespace RuntimeIcons
 
         internal static ManualLogSource Log;
 
-        internal static SnapshotCamera SnapshotCamera;
-        internal static StageComponent CameraStage;
+        //internal static SnapshotCamera SnapshotCamera;
+        //internal static StageComponent CameraStage;
+        internal static NewStageComponent NewCameraStage;
 
         private void Awake()
         {
@@ -44,7 +45,8 @@ namespace RuntimeIcons
                 PluginConfig.Init();
 
                 Log.LogInfo("Preparing SnapshotCamera");
-
+                
+                /*
                 SnapshotCamera = SnapshotCamera.MakeSnapshotCamera(LayerMask.GetMask("Default", "Player", "Water",
                     "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
                     "MapHazards", "MiscLevelGeometry", "Terrain"));
@@ -58,6 +60,13 @@ namespace RuntimeIcons
                     transform = { parent = SnapshotCamera.transform }
                 };
                 CameraStage = stageObject.AddComponent<StageComponent>();
+                */
+                
+                NewCameraStage = NewStageComponent.CreateStage(HideFlags.HideAndDontSave, LayerMask.GetMask("Default", "Player", "Water",
+                    "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
+                    "MapHazards", "MiscLevelGeometry", "Terrain"), "New Stage");
+                DontDestroyOnLoad(NewCameraStage.gameObject);
+                NewCameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
 
                 Log.LogInfo("Patching Methods");
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using RuntimeIcons.Components;
+using RuntimeIcons.Utils;
 using UnityEngine;
 using Object = System.Object;
 
@@ -12,7 +13,7 @@ namespace RuntimeIcons.Patches;
 internal class GrabbableObjectPatch
 {
 
-    private static Sprite BrokenSrpite;
+    private static Sprite BrokenSprite { get; set; }
     
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
@@ -22,10 +23,10 @@ internal class GrabbableObjectPatch
             __instance.itemProperties.itemIcon.name != "ScrapItemIcon2") 
             return;
 
-        if (!BrokenSrpite)
+        if (!BrokenSprite)
         {
-            BrokenSrpite = UnityEngine.Object.Instantiate(__instance.itemProperties.itemIcon);
-            BrokenSrpite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
+            BrokenSprite = UnityEngine.Object.Instantiate(__instance.itemProperties.itemIcon);
+            BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
         }
         
         if (PluginConfig.Blacklist.Contains(__instance.itemProperties.itemName))
@@ -57,7 +58,7 @@ internal class GrabbableObjectPatch
                         UnityEngine.Object.Destroy(texture);
                         RuntimeIcons.Log.LogError($"Expected Icon {filename} has the wrong format!");
                     }
-                    else if (!IsTransparent(texture))
+                    else if (!texture.IsTransparent())
                     {
                         var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
                             new Vector2(texture.width / 2f, texture.height / 2f));
@@ -79,21 +80,18 @@ internal class GrabbableObjectPatch
 
         try
         {
-            RuntimeIcons.CameraStage.PrepareStageFor(grabbableObject);
+            RuntimeIcons.NewCameraStage.PrepareStageFor(grabbableObject);
 
-            RuntimeIcons.CameraStage.FindOptimalRotationForCamera(RuntimeIcons.SnapshotCamera.cam);
+            RuntimeIcons.NewCameraStage.FindOptimalRotation();
                 
-            RuntimeIcons.CameraStage.FindOptimalOffsetAndScaleForCamera(RuntimeIcons.SnapshotCamera.cam,
-                new Vector2(128, 128));
+            RuntimeIcons.NewCameraStage.FindOptimalOffsetAndScale();
 
-            var transform = RuntimeIcons.CameraStage.transform;
-            var texture = RuntimeIcons.SnapshotCamera.TakeObjectSnapshot(RuntimeIcons.CameraStage.gameObject, 
-                transform.localPosition, transform.rotation, transform.localScale);
+            var texture = RuntimeIcons.NewCameraStage.TakeSnapshot();
 
-            SnapshotCamera.SavePNG(texture, $"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
+            texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 BepInEx.Paths.CachePath);
-
-            if (!IsTransparent(texture))
+            
+            if (!texture.IsTransparent())
             {
                 var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
                     new Vector2(texture.width / 2f, texture.height / 2f));
@@ -103,21 +101,13 @@ internal class GrabbableObjectPatch
             else
             {
                 RuntimeIcons.Log.LogError($"{grabbableObject.itemProperties.itemName} Generated Empty Sprite!");
-                grabbableObject.itemProperties.itemIcon = BrokenSrpite;
+                grabbableObject.itemProperties.itemIcon = BrokenSprite;
             }
         }
         finally
         {
-            RuntimeIcons.CameraStage.ResetStage();
+            //RuntimeIcons.CameraStage.ResetStage();
+            RuntimeIcons.NewCameraStage.ResetStage();
         }
-    }
-    
-    public static bool IsTransparent(Texture2D tex)
-    {
-        for (var x = 0; x < tex.width; x++)
-        for (var y = 0; y < tex.height; y++)
-            if (tex.GetPixel(x, y).a != 0)
-                return false;
-        return true;
     }
 }

@@ -75,7 +75,7 @@ public class SnapshotCamera : MonoBehaviour {
         GameObject cameraGO = new GameObject("Camera");
         cameraGO.hideFlags |= HideFlags.HideAndDontSave;
         cameraGO.transform.parent = snapshotCameraGO.transform;
-        //cameraGO.SetActive(true);
+        
         // Add a Camera component to the GameObject
         Camera cam = cameraGO.AddComponent<Camera>();
 
@@ -221,8 +221,8 @@ public class SnapshotCamera : MonoBehaviour {
         private Vector3 position;
         private Quaternion rotation;
         private Vector3 scale;
-        private Dictionary<GameObject, int> layers;
-        private Dictionary<Material, Shader> shaders;
+        /*private Dictionary<GameObject, int> layers;
+        private Dictionary<Material, Shader> shaders;*/
 
         /// <summary>
         /// Store the current state (layers, position, rotation, and scale) of a GameObject
@@ -235,7 +235,7 @@ public class SnapshotCamera : MonoBehaviour {
             this.rotation = gameObject.transform.rotation;
             this.scale = gameObject.transform.localScale;
 
-            this.layers = new Dictionary<GameObject, int>();
+            /*this.layers = new Dictionary<GameObject, int>();
             foreach (Transform t in gameObject.GetComponentsInChildren<Transform>(true))
             {
                 this.layers.Add(t.gameObject, t.gameObject.layer);
@@ -248,7 +248,7 @@ public class SnapshotCamera : MonoBehaviour {
                 {
                     this.shaders.TryAdd(m, m.shader);
                 }
-            }
+            }*/
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ public class SnapshotCamera : MonoBehaviour {
             this.gameObject.transform.rotation = this.rotation;
             this.gameObject.transform.localScale = this.scale;
 
-            foreach (KeyValuePair<GameObject, int> entry in this.layers)
+            /*foreach (KeyValuePair<GameObject, int> entry in this.layers)
             {
                 entry.Key.layer = entry.Value;
             }
@@ -268,7 +268,7 @@ public class SnapshotCamera : MonoBehaviour {
             foreach (KeyValuePair<Material, Shader> entry in this.shaders)
             {
                 entry.Key.shader = entry.Value;
-            }
+            }*/
         }
     }
 
@@ -289,18 +289,18 @@ public class SnapshotCamera : MonoBehaviour {
         gameObject.transform.localScale = scale;
         //SetLayersRecursively(gameObject);
 
-        Shader shader = null;
+        /*Shader shader = null;
         foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>(true))
         {
             foreach (Material m in r.sharedMaterials)
             {
-                if (m.shader.name == "HDRP/Lit")
+                if (m.shader.name == "HDRP/Lit" && m.shader.)
                 {
                     shader ??= Shader.Find("HDRP/Lit");
                     m.shader = shader;
                 }
             }
-        }
+        }*/
 
         return goss;
     }

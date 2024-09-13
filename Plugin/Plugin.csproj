@@ -49,9 +49,6 @@
         <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false" Private="False"/>
         <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false" Private="False"/>
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="src\Utils\" />
-    </ItemGroup>
 	
 	<!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
         <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
