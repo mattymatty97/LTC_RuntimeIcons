@@ -177,7 +177,7 @@ public class NewStageComponent : MonoBehaviour
         
         StagedTransform = objectToAdjust.transform;
 
-        var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset, grabbableObject.itemProperties.restingRotation.z);
+        var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset + 90f, grabbableObject.itemProperties.restingRotation.z);
         //var rotation = Quaternion.Euler(grabbableObject.itemProperties.rotationOffset.x, grabbableObject.itemProperties.rotationOffset.y, grabbableObject.itemProperties.rotationOffset.z);
         
         var matrix = Matrix4x4.TRS(Vector3.zero, rotation, StagedTransform.localScale);
@@ -200,7 +200,7 @@ public class NewStageComponent : MonoBehaviour
     
     public void SetObjectOnStage(Transform transform)
     {
-        if (StagedTransform != null || StagedTransform != transform)
+        if (StagedTransform != null && StagedTransform != transform)
             throw new InvalidOperationException("An Object is already on stage!");
         
         RuntimeIcons.Log.LogInfo($"Setting stage for {transform.name}");
@@ -235,8 +235,8 @@ public class NewStageComponent : MonoBehaviour
         }
         else
         {
-            //if (StagedObject.itemProperties.twoHandedAnimation)
-            //    TargetTransform.Rotate(_camera.transform.up, -135, Space.World);
+            /*if (StagedObject.itemProperties.twoHandedAnimation)
+               TargetTransform.Rotate(_camera.transform.up, 90, Space.World);*/
 
             var matrix = Matrix4x4.TRS(Vector3.zero, TargetTransform.rotation, Vector3.one);
             if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(TargetGo, out var bounds, matrix))
@@ -250,15 +250,20 @@ public class NewStageComponent : MonoBehaviour
                 RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -75 x");
                 TargetTransform.Rotate(_camera.transform.right, -75, Space.World);
 
-                if (bounds.extents.z < bounds.extents.x)
+                if (bounds.extents.z < bounds.extents.x * 0.5f)
                 {
-                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 z");
-                    TargetTransform.Rotate(_camera.transform.forward, -45, Space.World);
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 45 z | 1");
+                    TargetTransform.Rotate(_camera.transform.forward, 45, Space.World);
                 }
-                else if (bounds.extents.x < bounds.extents.z * 0.85f)
+                else if (bounds.extents.z < bounds.extents.x * 0.85f)
                 {
-                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 z");
-                    TargetTransform.Rotate(_camera.transform.forward, -45, Space.World);
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 90 z | 1");
+                    TargetTransform.Rotate(_camera.transform.forward, 90, Space.World);
+                }
+                else if (bounds.extents.x < bounds.extents.z * 0.5f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 90 z | 2");
+                    TargetTransform.Rotate(_camera.transform.forward, 45, Space.World);
                 }
             }
             else
@@ -268,6 +273,15 @@ public class NewStageComponent : MonoBehaviour
 
                 if (bounds.extents.x < bounds.extents.z * 0.85f)
                 {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 y");
+                    TargetTransform.Rotate(_camera.transform.up, -45, Space.World);
+                }
+                else if ((bounds.extents.y - bounds.extents.z) / Math.Abs(bounds.extents.z) < 0.01f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 25 x");
+                    TargetTransform.Rotate(_camera.transform.right, 25, Space.World);
+                    RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 25 z");
+                    TargetTransform.Rotate(_camera.transform.forward, 25, Space.World);
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 y");
                     TargetTransform.Rotate(_camera.transform.up, -45, Space.World);
                 }
@@ -334,9 +348,8 @@ public class NewStageComponent : MonoBehaviour
         {
             StagedTransform.SetParent(Memory.Parent, false);
 
-            StagedTransform.localPosition = Memory.LocalPosition;
-            StagedTransform.localRotation = Memory.LocalRotation;
             StagedTransform.localScale = Memory.LocalScale;
+            StagedTransform.SetLocalPositionAndRotation(Memory.LocalPosition,Memory.LocalRotation);
         }
 
         StagedObject = null;
@@ -375,7 +388,10 @@ public class NewStageComponent : MonoBehaviour
         RenderTexture.active = tempTexture;
         
         // Extract the image into a new texture without mipmaps
-        Texture2D texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.ARGB32,  -1,false);
+        Texture2D texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.ARGB32,  -1,false)
+        {
+            name = $"{nameof(RuntimeIcons)}.{TargetTransform.name}Texture"
+        };
         
         texture.ReadPixels(new Rect(0, 0, tempTexture.width, tempTexture.height), 0, 0);
         texture.Apply();

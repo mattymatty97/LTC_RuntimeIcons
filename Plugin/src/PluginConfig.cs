@@ -33,7 +33,7 @@ internal static class PluginConfig
         _blacklistConfig = config.Bind("Config", "BlacklistConfig", "Body,",
             "List of items to not replace icons");
 
-        _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Teeth: 21.47,147.5,-13.12|Clock: -30,90,-25|Sticky note:75,-180,0|Whoopie cushion: -43.08,69.25,-75.49|Candy: -41.64,-62.76,71.12",
+        _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90",
             "Dictionary of alternate rotations for items\nListSeparator=|");
         
         ParseBlacklist();
