@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -86,6 +86,11 @@ internal static class PluginConfig
                         {
                             var grabbableObject = spawnedItem.GetComponentInChildren<GrabbableObject>();
                             grabbableObject.Start();
+                            grabbableObject.Update();
+                            var animators = grabbableObject.GetComponentsInChildren<Animator>();
+                            foreach (var animator in animators)
+                                animator.Update(Time.deltaTime);
+                            GrabbableObjectPatch.ComputeSprite(grabbableObject);
                         }
                         catch { }
                         finally
