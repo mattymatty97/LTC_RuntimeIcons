@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MattyFixes.Utils;
 using UnityEngine;
-using UnityEngine.Internal;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
 namespace RuntimeIcons.Components;
@@ -11,22 +14,48 @@ public class NewStageComponent : MonoBehaviour
     private NewStageComponent(){}
 
     private GameObject LightGo { get; set; }
-    private GameObject TargetGo { get; set; }
+
+    private GameObject PivotGo
+    {
+        get
+        {
+            if (!_targetGo)
+                _targetGo = CreatePivotGo();
+            return _targetGo;
+        }
+    }
+
     private GameObject CameraGo { get; set; }
 
     private Transform LightTransform => LightGo.transform;
-    private Transform TargetTransform => TargetGo.transform;
+    private Transform PivotTransform => PivotGo.transform;
     private Transform CameraTransform => CameraGo.transform;
     
     private Camera _camera;
     private HDAdditionalCameraData _cameraSettings;
     private CustomPassThing _cameraPass;
-    
-    
+    private GameObject _targetGo;
+
+
+    public Vector2Int Resolution { get; set; } = new Vector2Int(128, 128);
     public GrabbableObject StagedObject { get; private set; }
     public Transform StagedTransform { get; private set; }
     
     public TransformMemory Memory { get; private set; }
+
+    private GameObject CreatePivotGo()
+    {
+        //add the StageTarget
+        var targetGo = new GameObject($"{transform.name}.Pivot")
+        {
+            transform =
+            {
+                position = transform.position,
+                rotation = transform.rotation
+            }
+        };
+        return targetGo;
+    }
 
     public static NewStageComponent CreateStage(HideFlags hideFlags, int layerMask = 1,string stageName = "Stage")
     {
@@ -39,17 +68,6 @@ public class NewStageComponent : MonoBehaviour
 
         //add the component to the stage
         var stageComponent = stageGo.AddComponent<NewStageComponent>();
-        
-        //add the StageTarget
-        var targetGo = new GameObject("Target")
-        {
-            hideFlags = hideFlags,
-            transform =
-            {
-                parent = stageGo.transform
-            }
-        };
-        stageComponent.TargetGo = targetGo;
 
         //add the stage Lights
         
@@ -102,12 +120,42 @@ public class NewStageComponent : MonoBehaviour
         lightData.innerSpotPercent = 82.7f;
         lightData.intensity = 1000f;
         
-        // add front light ( clone the ceiling one but rotate it )
-        var lightGo2 = Instantiate(lightGo1, lightsGo.transform);
-        lightGo2.name = "SpotLight 2";
-        lightGo2.hideFlags = hideFlags;
-        lightGo2.transform.localPosition = new Vector3(0, 0, -4);
-        lightGo2.transform.rotation = Quaternion.LookRotation(Vector3.forward);
+        // add front light ( similar to ceiling one but does not have Specular )
+        var lightGo2 = new GameObject("SpotLight 2")
+        {
+            hideFlags = hideFlags,
+            transform =
+            {
+                parent = lightsGo.transform,
+                localPosition = new Vector3(0, 0, -4),
+                rotation = Quaternion.LookRotation(Vector3.forward)
+            }
+        };
+
+        var light2 = lightGo2.AddComponent<Light>();
+        light2.type = LightType.Spot;
+        light2.shape = LightShape.Cone;
+        light2.color = Color.white;
+        light2.colorTemperature = 6901;
+        light2.useColorTemperature = true;
+        light2.shadows = LightShadows.None;
+        light2.intensity = 250f;
+        light2.spotAngle = 160.0f;
+        light2.innerSpotAngle = 21.8f;
+        light2.range = 7.11f;
+        
+        var lightData2 = lightGo2.AddComponent<HDAdditionalLightData>();
+        lightData2.affectDiffuse = true;
+        lightData2.affectSpecular = false;
+        lightData2.affectsVolumetric = true;
+        lightData2.applyRangeAttenuation = true;
+        lightData2.color = Color.white;
+        lightData2.colorShadow = true;
+        lightData2.customSpotLightShadowCone = 30f;
+        lightData2.distance = 150000000000;
+        lightData2.fadeDistance = 10000;
+        lightData2.innerSpotPercent = 82.7f;
+        lightData2.intensity = 1000f;
         
         //add Camera
         var cameraGo = new GameObject("Camera")
@@ -156,20 +204,22 @@ public class NewStageComponent : MonoBehaviour
         
         customPass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
         customPass.targetDepthBuffer = CustomPass.TargetBuffer.Custom;
-        customPass.clearFlags = UnityEngine.Rendering.ClearFlag.All;
+        customPass.clearFlags = ClearFlag.All;
         
         return stageComponent;
     }
+    
+    
 
     public void SetItemOnStage(GrabbableObject grabbableObject)
     {
-        if (StagedObject != null && StagedObject != grabbableObject)
+        if (StagedObject && StagedObject != grabbableObject)
             throw new InvalidOperationException("An Object is already on stage!");
         
         RuntimeIcons.Log.LogInfo($"Setting stage for {grabbableObject.itemProperties.itemName}");
         
-        TargetTransform.localPosition = Vector3.zero;
-        TargetTransform.rotation = Quaternion.identity;
+        PivotTransform.position = transform.position;
+        PivotTransform.rotation = Quaternion.identity;
         
         StagedObject = grabbableObject;
 
@@ -178,17 +228,15 @@ public class NewStageComponent : MonoBehaviour
         StagedTransform = objectToAdjust.transform;
 
         var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset + 90f, grabbableObject.itemProperties.restingRotation.z);
-        //var rotation = Quaternion.Euler(grabbableObject.itemProperties.rotationOffset.x, grabbableObject.itemProperties.rotationOffset.y, grabbableObject.itemProperties.rotationOffset.z);
         
         var matrix = Matrix4x4.TRS(Vector3.zero, rotation, StagedTransform.localScale);
-        if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(objectToAdjust, out var bounds, matrix))
+        if (!VerticesExtensions.TryGetBounds(objectToAdjust, out var bounds, matrix))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
         
-        StagedTransform.SetParent(TargetTransform, false);
-        StagedTransform.localPosition = -bounds.center;
-        StagedTransform.localRotation = rotation;
+        StagedTransform.SetParent(PivotTransform, false);
+        StagedTransform.SetLocalPositionAndRotation(-bounds.center, rotation);
         
         RuntimeIcons.Log.LogInfo($"Stage Anchor offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
     }
@@ -200,23 +248,23 @@ public class NewStageComponent : MonoBehaviour
     
     public void SetObjectOnStage(Transform transform)
     {
-        if (StagedTransform != null && StagedTransform != transform)
+        if (StagedTransform && StagedTransform != transform)
             throw new InvalidOperationException("An Object is already on stage!");
         
         RuntimeIcons.Log.LogInfo($"Setting stage for {transform.name}");
         
-        TargetTransform.localPosition = Vector3.zero;
-        TargetTransform.rotation = Quaternion.identity;
+        PivotTransform.localPosition = Vector3.zero;
+        PivotTransform.rotation = Quaternion.identity;
         
         StagedTransform = transform;
         
         var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, transform.localScale);
-        if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(transform.gameObject, out var bounds, matrix))
+        if (!VerticesExtensions.TryGetBounds(transform.gameObject, out var bounds, matrix))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
         
-        StagedTransform.SetParent(TargetTransform, false);
+        StagedTransform.SetParent(PivotTransform, false);
         StagedTransform.localPosition = -bounds.center;
         
         RuntimeIcons.Log.LogInfo($"Stage Anchor offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
@@ -224,22 +272,22 @@ public class NewStageComponent : MonoBehaviour
 
     public void FindOptimalRotation()
     {
-        if (StagedObject == null)
+        if (!StagedObject)
             throw new InvalidOperationException("No Object on stage!");
         
 
         if (PluginConfig.RotationOverrides.TryGetValue(StagedObject.itemProperties.itemName,
                 out var rotations))
         {
-            TargetTransform.Rotate(rotations, Space.World);
+            PivotTransform.Rotate(rotations, Space.World);
         }
         else
         {
             /*if (StagedObject.itemProperties.twoHandedAnimation)
-               TargetTransform.Rotate(_camera.transform.up, 90, Space.World);*/
+               PivotTransform.Rotate(_camera.transform.up, 90, Space.World);*/
 
-            var matrix = Matrix4x4.TRS(Vector3.zero, TargetTransform.rotation, Vector3.one);
-            if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(TargetGo, out var bounds, matrix))
+            var matrix = Matrix4x4.TRS(Vector3.zero, PivotTransform.rotation, Vector3.one);
+            if (!VerticesExtensions.TryGetBounds(PivotGo, out var bounds, matrix))
                 throw new InvalidOperationException("This object has no Renders!");
 
             if (bounds.size == Vector3.zero)
@@ -248,74 +296,70 @@ public class NewStageComponent : MonoBehaviour
             if (bounds.extents.y < bounds.extents.x / 2f && bounds.extents.y <  bounds.extents.z / 2f)
             {
                 RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -75 x");
-                TargetTransform.Rotate(_camera.transform.right, -75, Space.World);
+                PivotTransform.Rotate(_camera.transform.right, -75, Space.World);
 
                 if (bounds.extents.z < bounds.extents.x * 0.5f)
                 {
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 45 z | 1");
-                    TargetTransform.Rotate(_camera.transform.forward, 45, Space.World);
+                    PivotTransform.Rotate(_camera.transform.forward, 45, Space.World);
                 }
                 else if (bounds.extents.z < bounds.extents.x * 0.85f)
                 {
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 90 z | 1");
-                    TargetTransform.Rotate(_camera.transform.forward, 90, Space.World);
+                    PivotTransform.Rotate(_camera.transform.forward, 90, Space.World);
                 }
                 else if (bounds.extents.x < bounds.extents.z * 0.5f)
                 {
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 90 z | 2");
-                    TargetTransform.Rotate(_camera.transform.forward, 45, Space.World);
+                    PivotTransform.Rotate(_camera.transform.forward, 45, Space.World);
                 }
             }
             else
             {
                 RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -25 x");
-                TargetTransform.Rotate(_camera.transform.right, -25, Space.World);
+                PivotTransform.Rotate(_camera.transform.right, -25, Space.World);
 
                 if (bounds.extents.x < bounds.extents.z * 0.85f)
                 {
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 y");
-                    TargetTransform.Rotate(_camera.transform.up, -45, Space.World);
+                    PivotTransform.Rotate(_camera.transform.up, -45, Space.World);
                 }
                 else if ((bounds.extents.y - bounds.extents.z) / Math.Abs(bounds.extents.z) < 0.01f)
                 {
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 25 x");
-                    TargetTransform.Rotate(_camera.transform.right, 25, Space.World);
+                    PivotTransform.Rotate(_camera.transform.right, 25, Space.World);
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 25 z");
-                    TargetTransform.Rotate(_camera.transform.forward, 25, Space.World);
+                    PivotTransform.Rotate(_camera.transform.forward, 25, Space.World);
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated -45 y");
-                    TargetTransform.Rotate(_camera.transform.up, -45, Space.World);
+                    PivotTransform.Rotate(_camera.transform.up, -45, Space.World);
                 }
                 else if (bounds.extents.y < bounds.extents.x / 2f || bounds.extents.x < bounds.extents.y / 2f)
                 {
                     RuntimeIcons.Log.LogDebug($"{StagedObject.itemProperties.itemName} rotated 45 z");
-                    TargetTransform.Rotate(_camera.transform.forward, 45, Space.World);
+                    PivotTransform.Rotate(_camera.transform.forward, 45, Space.World);
                 }
             }
         }
 
-        RuntimeIcons.Log.LogInfo($"Stage rotation {TargetTransform.localRotation.eulerAngles}");
+        RuntimeIcons.Log.LogInfo($"Stage rotation {PivotTransform.localRotation.eulerAngles}");
     }
+    
 
     public void FindOptimalOffsetAndScale()
     {
-        FindOptimalOffsetAndScale(new Vector2(128, 128));
-    }
-
-    public void FindOptimalOffsetAndScale(Vector2 targetPixelArea)
-    {
-        if (StagedTransform == null)
+        if (!StagedTransform)
             throw new InvalidOperationException("No Object on stage!");
         
-        var matrix = Matrix4x4.TRS(Vector3.zero, TargetTransform.rotation, Vector3.one);
-        if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(TargetGo, out var bounds, matrix))
+        var matrix = Matrix4x4.TRS(Vector3.zero, PivotTransform.rotation, Vector3.one);
+        if (!VerticesExtensions.TryGetBounds(PivotGo, out var bounds, matrix))
             throw new InvalidOperationException("This object has no Renders!");
         
         if (bounds.size == Vector3.zero)
             throw new InvalidOperationException("This object has no Bounds!");
         
         // Calculate the scale factor needed to fit within the target area
-        var pixelsPerUnit = targetPixelArea.y / (2f * _camera.orthographicSize);
-        var targetWorldArea = targetPixelArea / pixelsPerUnit;
+        var pixelsPerUnit = Resolution.y / (2f * _camera.orthographicSize);
+        var targetWorldArea = ((Vector2)Resolution) / pixelsPerUnit;
 
         // Calculate the scale factor considering the object's distance from the camera
         // also add some padding from the sides
@@ -338,13 +382,13 @@ public class NewStageComponent : MonoBehaviour
         
         RuntimeIcons.Log.LogInfo($"Stage offset {localOffset} scale {scale}");
 
-        TargetTransform.localPosition = localOffset;
-        TargetTransform.localScale = scale;
+        PivotTransform.position = transform.position + localOffset;
+        PivotTransform.localScale = scale;
     }
 
     public void ResetStage()
     {
-        if (StagedTransform != null)
+        if (StagedTransform)
         {
             StagedTransform.SetParent(Memory.Parent, false);
 
@@ -356,41 +400,44 @@ public class NewStageComponent : MonoBehaviour
         StagedTransform = null;
         Memory = default;
         
-        TargetTransform.localPosition = Vector3.zero;
-        TargetTransform.rotation = Quaternion.identity;
+        PivotTransform.position = transform.position;
+        PivotTransform.rotation = Quaternion.identity;
     }
 
-    public Texture2D TakeSnapshot(int width = 128, int height = 128)
+    public Texture2D TakeSnapshot()
     {
-        return TakeSnapshot(Color.clear, width, height);
+        return TakeSnapshot(Color.clear);
     }
     
-    public Texture2D TakeSnapshot(Color backgroundColor, int width = 128, int height = 128)
+    public Texture2D TakeSnapshot(Color backgroundColor)
     {
-        //Turn on the stage Lights
-        LightGo.SetActive(true);
-        
         // Set the background color of the camera
         _camera.backgroundColor = backgroundColor;
 
         // Get a temporary render texture and render the camera
-        var tempTexture = RenderTexture.GetTemporary(width, height, 8, RenderTextureFormat.ARGB32);
-        var tempTexture2 = RenderTexture.GetTemporary(width, height, 8, RenderTextureFormat.ARGB32);
+        var tempTexture = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGB32);
+        var tempTexture2 = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGB32);
         _camera.targetTexture = tempTexture2;
         _cameraPass.targetTexture = tempTexture;
-        _camera.Render();
-        
-        //Turn off the stage Lights
-        LightGo.SetActive(false);
-        
+        using (new IsolateStageLights(gameObject))
+        {
+            //Turn on the stage Lights
+            LightGo.SetActive(true);
+            
+            _camera.Render();
+            
+            //Turn off the stage Lights
+            LightGo.SetActive(false);
+        }
+
         // Activate the temporary render texture
-        RenderTexture previouslyActiveRenderTexture = RenderTexture.active;
+        var previouslyActiveRenderTexture = RenderTexture.active;
         RenderTexture.active = tempTexture;
         
         // Extract the image into a new texture without mipmaps
-        Texture2D texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.ARGB32,  -1,false)
+        var texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.ARGB32,  -1,false)
         {
-            name = $"{nameof(RuntimeIcons)}.{TargetTransform.name}Texture"
+            name = $"{nameof(RuntimeIcons)}.{StagedTransform.name}Texture"
         };
         
         texture.ReadPixels(new Rect(0, 0, tempTexture.width, tempTexture.height), 0, 0);
@@ -405,8 +452,45 @@ public class NewStageComponent : MonoBehaviour
         _cameraPass.targetTexture = null;
         RenderTexture.ReleaseTemporary(tempTexture);
         
+        RuntimeIcons.Log.LogInfo($"{texture.name} Rendered");
         // Return the texture
         return texture;
+    }
+
+    private class IsolateStageLights : IDisposable
+    {
+        private readonly HashSet<Light> _lightMemory;
+        private readonly Color _ambientLight;
+        
+        public IsolateStageLights(GameObject stage)
+        {
+            _lightMemory = UnityEngine.Pool.HashSetPool<Light>.Get();
+
+            _ambientLight = RenderSettings.ambientLight;
+            RenderSettings.ambientLight = Color.black;
+
+            var localLights = stage.GetComponentsInChildren<Light>();
+
+            var globalLights = FindObjectsOfType<Light>().Where(l => !localLights.Contains(l)).Where(l => l.enabled).ToArray();
+
+            foreach (var light in globalLights)
+            {
+                light.enabled = false;
+                _lightMemory.Add(light);
+            }
+        }
+
+        public void Dispose()
+        {
+            RenderSettings.ambientLight = _ambientLight;
+            
+            foreach (var light in _lightMemory)
+            {
+                light.enabled = true;
+            }
+
+            UnityEngine.Pool.HashSetPool<Light>.Release(_lightMemory);
+        }
     }
 
     public record struct TransformMemory

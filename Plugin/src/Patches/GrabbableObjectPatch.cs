@@ -2,9 +2,11 @@
 using System.Collections;
 using System.IO;
 using System.Runtime.CompilerServices;
+using BepInEx;
 using HarmonyLib;
 using RuntimeIcons.Utils;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RuntimeIcons.Patches;
 
@@ -36,7 +38,7 @@ internal class GrabbableObjectPatch
 
         if (!BrokenSprite && __instance.itemProperties.itemIcon != null)
         {
-            BrokenSprite = UnityEngine.Object.Instantiate(__instance.itemProperties.itemIcon);
+            BrokenSprite = Object.Instantiate(__instance.itemProperties.itemIcon);
             BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
         }
         
@@ -80,7 +82,7 @@ internal class GrabbableObjectPatch
 
                     if (texture.width != 128 || texture.height != 128)
                     {
-                        UnityEngine.Object.Destroy(texture);
+                        Object.Destroy(texture);
                         RuntimeIcons.Log.LogError($"Expected Icon {filename} has the wrong format!");
                     }
                     else if (!texture.IsTransparent())
@@ -114,7 +116,7 @@ internal class GrabbableObjectPatch
             var texture = RuntimeIcons.NewCameraStage.TakeSnapshot();
 
             texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
-                BepInEx.Paths.CachePath);
+                Paths.CachePath);
             
             if (!texture.IsTransparent())
             {
@@ -131,6 +133,7 @@ internal class GrabbableObjectPatch
         }
         finally
         {
+            RuntimeIcons.Log.LogInfo($"{grabbableObject.itemProperties.itemName} now has a new icon");
             //RuntimeIcons.CameraStage.ResetStage();
             RuntimeIcons.NewCameraStage.ResetStage();
         }
