@@ -44,17 +44,14 @@ public class CustomPassThing : CustomPass
 
     protected override void Execute(CustomPassContext ctx)
     {
-        var hdCamera = ctx.hdCamera;
-        var frameSettings = hdCamera.frameSettings;
+        ctx.cmd.SetRenderTarget(targetTexture.colorBuffer, targetTexture.depthBuffer);
+        ctx.cmd.ClearRenderTarget(true, true, Color.clear);
 
+        var frameSettings = ctx.hdCamera.frameSettings;
         PerObjectData rendererConfiguration = HDUtils.GetRendererConfiguration(frameSettings.IsEnabled(FrameSettingsField.ProbeVolume), frameSettings.IsEnabled(FrameSettingsField.Shadowmask));
 
         Render(ref ctx, RenderQueueRange.opaque, rendererConfiguration, frameSettings.IsEnabled(FrameSettingsField.FPTLForForwardOpaque));
 
         Render(ref ctx, RenderQueueRange.transparent, rendererConfiguration, false);
-
-        ctx.cmd.SetRenderTarget(targetTexture);
-        ctx.cmd.ClearRenderTarget(true, true, Color.clear);
-        CustomPassUtils.Copy(in ctx, ctx.customColorBuffer.Value, RTHandles.Alloc(targetTexture));
     }
 }
