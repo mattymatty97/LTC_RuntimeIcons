@@ -74,6 +74,7 @@ public class NewStageComponent : MonoBehaviour
         var lightsGo = new GameObject("Stage Lights")
         {
             hideFlags = hideFlags,
+            layer = 1,
             transform =
             {
                 parent = stageGo.transform
@@ -87,10 +88,11 @@ public class NewStageComponent : MonoBehaviour
         var lightGo1 = new GameObject("SpotLight 1")
         {
             hideFlags = hideFlags,
+            layer = 1,
             transform =
             {
                 parent = lightsGo.transform,
-                localPosition = new Vector3(0, 4, 0),
+                localPosition = new Vector3(0, 3, 0),
                 rotation = Quaternion.LookRotation(Vector3.down)
             }
         };
@@ -102,7 +104,6 @@ public class NewStageComponent : MonoBehaviour
         light.colorTemperature = 6901;
         light.useColorTemperature = true;
         light.shadows = LightShadows.None;
-        light.intensity = 250f;
         light.spotAngle = 160.0f;
         light.innerSpotAngle = 21.8f;
         light.range = 7.11f;
@@ -118,17 +119,18 @@ public class NewStageComponent : MonoBehaviour
         lightData.distance = 150000000000;
         lightData.fadeDistance = 10000;
         lightData.innerSpotPercent = 82.7f;
-        lightData.intensity = 1000f;
+        lightData.intensity = 500f;
         
-        // add front light ( similar to ceiling one but does not have Specular )
+        // add front light ( similar to ceiling one but facing a 45 angle )
         var lightGo2 = new GameObject("SpotLight 2")
         {
             hideFlags = hideFlags,
+            layer = 1,
             transform =
             {
                 parent = lightsGo.transform,
-                localPosition = new Vector3(0, 0, -4),
-                rotation = Quaternion.LookRotation(Vector3.forward)
+                localPosition = new Vector3(-2.7f, 0, -2.7f),
+                rotation = Quaternion.Euler(0, 45, 0)
             }
         };
 
@@ -139,14 +141,13 @@ public class NewStageComponent : MonoBehaviour
         light2.colorTemperature = 6901;
         light2.useColorTemperature = true;
         light2.shadows = LightShadows.None;
-        light2.intensity = 250f;
         light2.spotAngle = 160.0f;
         light2.innerSpotAngle = 21.8f;
         light2.range = 7.11f;
         
         var lightData2 = lightGo2.AddComponent<HDAdditionalLightData>();
         lightData2.affectDiffuse = true;
-        lightData2.affectSpecular = false;
+        lightData2.affectSpecular = true;
         lightData2.affectsVolumetric = true;
         lightData2.applyRangeAttenuation = true;
         lightData2.color = Color.white;
@@ -155,7 +156,45 @@ public class NewStageComponent : MonoBehaviour
         lightData2.distance = 150000000000;
         lightData2.fadeDistance = 10000;
         lightData2.innerSpotPercent = 82.7f;
-        lightData2.intensity = 1000f;
+        lightData2.intensity = 300f;
+        lightData2.shapeRadius = 0.5f;
+        
+        // add a second front light ( similar to the other one but does not have Specular )
+        var lightGo3 = new GameObject("SpotLight 3")
+        {
+            hideFlags = hideFlags,
+            layer = 1,
+            transform =
+            {
+                parent = lightsGo.transform,
+                localPosition = new Vector3(2.7f, 0, -2.7f),
+                rotation = Quaternion.Euler(0, -45, 0)
+            }
+        };
+
+        var light3 = lightGo3.AddComponent<Light>();
+        light3.type = LightType.Spot;
+        light3.shape = LightShape.Cone;
+        light3.color = Color.white;
+        light3.colorTemperature = 6901;
+        light3.useColorTemperature = true;
+        light3.shadows = LightShadows.None;
+        light3.spotAngle = 160.0f;
+        light3.innerSpotAngle = 21.8f;
+        light3.range = 7.11f;
+        
+        var lightData3 = lightGo3.AddComponent<HDAdditionalLightData>();
+        lightData3.affectDiffuse = true;
+        lightData3.affectSpecular = false;
+        lightData3.affectsVolumetric = true;
+        lightData3.applyRangeAttenuation = true;
+        lightData3.color = Color.white;
+        lightData3.colorShadow = true;
+        lightData3.customSpotLightShadowCone = 30f;
+        lightData3.distance = 150000000000;
+        lightData3.fadeDistance = 10000;
+        lightData3.innerSpotPercent = 82.7f;
+        lightData3.intensity = 75f;
         
         //add Camera
         var cameraGo = new GameObject("Camera")
@@ -212,6 +251,7 @@ public class NewStageComponent : MonoBehaviour
     
     public void SetItemOnStage(GrabbableObject grabbableObject)
     {
+        
         if (StagedObject && StagedObject != grabbableObject)
             throw new InvalidOperationException("An Object is already on stage!");
         
@@ -387,6 +427,8 @@ public class NewStageComponent : MonoBehaviour
 
         PivotTransform.position = transform.position + localOffset;
         PivotTransform.localScale = scale;
+        
+        LightTransform.position = PivotTransform.position;
     }
 
     public void ResetStage()
@@ -406,6 +448,8 @@ public class NewStageComponent : MonoBehaviour
         PivotTransform.parent = null;
         PivotTransform.position = transform.position;
         PivotTransform.rotation = Quaternion.identity;
+        LightTransform.localPosition = Vector3.zero;
+        LightTransform.rotation = Quaternion.identity;
     }
 
     public Texture2D TakeSnapshot()

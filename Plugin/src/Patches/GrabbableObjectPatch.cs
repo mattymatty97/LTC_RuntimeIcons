@@ -36,7 +36,7 @@ internal class GrabbableObjectPatch
         if (ItemHasIcon(__instance.itemProperties)) 
             return;
 
-        if (!BrokenSprite && __instance.itemProperties.itemIcon != null)
+        if (!BrokenSprite && __instance.itemProperties.itemIcon)
         {
             BrokenSprite = Object.Instantiate(__instance.itemProperties.itemIcon);
             BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
