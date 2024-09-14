@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
-using RuntimeIcons.Components;
 using RuntimeIcons.Utils;
 using UnityEngine;
-using Object = System.Object;
 
 namespace RuntimeIcons.Patches;
 
@@ -25,6 +24,8 @@ internal class GrabbableObjectPatch
             return false;
         return true;
     }
+
+    private static ConditionalWeakTable<Item, GrabbableObject> _pendingObjects = [];
     
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
@@ -41,9 +42,23 @@ internal class GrabbableObjectPatch
         
         if (PluginConfig.Blacklist.Contains(__instance.itemProperties.itemName))
             return;
-            
-        ComputeSprite(__instance);
+        
+        if (_pendingObjects.TryGetValue(__instance.itemProperties, out var previousObject) && previousObject)
+            return;
+
+        _pendingObjects.AddOrUpdate(__instance.itemProperties, __instance);
+
+        __instance.StartCoroutine(ComputeSpriteCoroutine(__instance));
     }
+
+    private static IEnumerator ComputeSpriteCoroutine(GrabbableObject @this)
+    {
+        yield return null;
+        yield return null;
+        ComputeSprite(@this);
+        _pendingObjects.Remove(@this.itemProperties);
+    }
+    
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void ComputeSprite(GrabbableObject grabbableObject)
