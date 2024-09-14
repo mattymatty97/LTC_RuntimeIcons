@@ -217,6 +217,7 @@ public class NewStageComponent : MonoBehaviour
         
         RuntimeIcons.Log.LogInfo($"Setting stage for {grabbableObject.itemProperties.itemName}");
         
+        PivotTransform.parent = null;
         PivotTransform.position = transform.position;
         PivotTransform.rotation = Quaternion.identity;
         SceneManager.MoveGameObjectToScene(PivotGo, grabbableObject.gameObject.scene);
@@ -253,6 +254,7 @@ public class NewStageComponent : MonoBehaviour
         
         RuntimeIcons.Log.LogInfo($"Setting stage for {targetTransform.name}");
         
+        PivotTransform.parent = null;
         PivotTransform.position = targetTransform.position;
         PivotTransform.rotation = Quaternion.identity;
         SceneManager.MoveGameObjectToScene(PivotGo, targetTransform.gameObject.scene);
@@ -401,6 +403,7 @@ public class NewStageComponent : MonoBehaviour
         StagedTransform = null;
         Memory = default;
         
+        PivotTransform.parent = null;
         PivotTransform.position = transform.position;
         PivotTransform.rotation = Quaternion.identity;
     }
@@ -420,7 +423,7 @@ public class NewStageComponent : MonoBehaviour
         var tempTexture2 = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGB32);
         _camera.targetTexture = tempTexture2;
         _cameraPass.targetTexture = tempTexture;
-        using (new IsolateStageLights(gameObject))
+        using (new IsolateStageLights(PivotGo))
         {
             //Turn on the stage Lights
             LightGo.SetActive(true);
