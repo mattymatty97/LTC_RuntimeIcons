@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -55,8 +55,7 @@ internal class GrabbableObjectPatch
 
     private static IEnumerator ComputeSpriteCoroutine(GrabbableObject @this)
     {
-        yield return null;
-        yield return null;
+        yield return new WaitForEndOfFrame();
         ComputeSprite(@this);
         _pendingObjects.Remove(@this.itemProperties);
     }
