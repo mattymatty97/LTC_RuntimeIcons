@@ -5,6 +5,7 @@ using MattyFixes.Utils;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.SceneManagement;
 
 namespace RuntimeIcons.Components;
 
@@ -35,8 +36,7 @@ public class NewStageComponent : MonoBehaviour
     private HDAdditionalCameraData _cameraSettings;
     private CustomPassThing _cameraPass;
     private GameObject _targetGo;
-
-
+    
     public Vector2Int Resolution { get; set; } = new Vector2Int(128, 128);
     public GrabbableObject StagedObject { get; private set; }
     public Transform StagedTransform { get; private set; }
@@ -210,7 +210,6 @@ public class NewStageComponent : MonoBehaviour
     }
     
     
-
     public void SetItemOnStage(GrabbableObject grabbableObject)
     {
         if (StagedObject && StagedObject != grabbableObject)
@@ -220,6 +219,7 @@ public class NewStageComponent : MonoBehaviour
         
         PivotTransform.position = transform.position;
         PivotTransform.rotation = Quaternion.identity;
+        SceneManager.MoveGameObjectToScene(PivotGo, grabbableObject.gameObject.scene);
         
         StagedObject = grabbableObject;
 
@@ -230,7 +230,7 @@ public class NewStageComponent : MonoBehaviour
         var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset + 90f, grabbableObject.itemProperties.restingRotation.z);
         
         var matrix = Matrix4x4.TRS(Vector3.zero, rotation, StagedTransform.localScale);
-        if (!VerticesExtensions.TryGetBounds(objectToAdjust, out var bounds, matrix))
+        if (!objectToAdjust.TryGetBounds(out var bounds, matrix))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
@@ -241,25 +241,26 @@ public class NewStageComponent : MonoBehaviour
         RuntimeIcons.Log.LogInfo($"Stage Anchor offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
     }
 
-    public void SetObjectOnStage(GameObject gameObject)
+    public void SetObjectOnStage(GameObject targetGameObject)
     {
-        SetObjectOnStage(gameObject.transform);
+        SetObjectOnStage(targetGameObject.transform);
     }
     
-    public void SetObjectOnStage(Transform transform)
+    public void SetObjectOnStage(Transform targetTransform)
     {
-        if (StagedTransform && StagedTransform != transform)
+        if (StagedTransform && StagedTransform != targetTransform)
             throw new InvalidOperationException("An Object is already on stage!");
         
-        RuntimeIcons.Log.LogInfo($"Setting stage for {transform.name}");
+        RuntimeIcons.Log.LogInfo($"Setting stage for {targetTransform.name}");
         
-        PivotTransform.localPosition = Vector3.zero;
+        PivotTransform.position = targetTransform.position;
         PivotTransform.rotation = Quaternion.identity;
+        SceneManager.MoveGameObjectToScene(PivotGo, targetTransform.gameObject.scene);
         
-        StagedTransform = transform;
+        StagedTransform = targetTransform;
         
-        var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, transform.localScale);
-        if (!VerticesExtensions.TryGetBounds(transform.gameObject, out var bounds, matrix))
+        var matrix = Matrix4x4.TRS(Vector3.zero, targetTransform.rotation, targetTransform.localScale);
+        if (!targetTransform.gameObject.TryGetBounds(out var bounds, matrix))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
