@@ -55,7 +55,9 @@ internal class GrabbableObjectPatch
 
     private static IEnumerator ComputeSpriteCoroutine(GrabbableObject @this)
     {
-        yield return new WaitForEndOfFrame();
+        //wait two frames for the animations to settle
+        yield return null;
+        yield return null;
         ComputeSprite(@this);
         _pendingObjects.Remove(@this.itemProperties);
     }
@@ -116,6 +118,7 @@ internal class GrabbableObjectPatch
 
             texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
+            
             texture.SaveEXR($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR"));
             

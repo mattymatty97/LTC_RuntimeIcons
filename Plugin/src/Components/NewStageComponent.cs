@@ -217,6 +217,7 @@ public class NewStageComponent : MonoBehaviour
         cam.cullingMask = layerMask;
         cam.orthographic = true;
         cam.orthographicSize = 1;
+        cam.aspect = 1;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = Color.clear;
         cam.nearClipPlane = 0.1f;
@@ -402,9 +403,10 @@ public class NewStageComponent : MonoBehaviour
         if (bounds.size == Vector3.zero)
             throw new InvalidOperationException("This object has no Bounds!");
         
-        // Calculate the scale factor needed to fit within the target area
-        var pixelsPerUnit = Resolution.y / (2f * _camera.orthographicSize);
-        var targetWorldArea = ((Vector2)Resolution) / pixelsPerUnit;
+        // Calculate the visible world area based on the camera's orthographic size and aspect ratio
+        var cameraHeight = 2f * _camera.orthographicSize; // Total height in world units (orthographicSize is half the height)
+        var cameraWidth = cameraHeight; // assume aspect ratio of 1
+        var targetWorldArea = new Vector2(cameraWidth, cameraHeight);
 
         // Calculate the scale factor considering the object's distance from the camera
         // also add some padding from the sides
@@ -494,8 +496,8 @@ public class NewStageComponent : MonoBehaviour
         
         texture.ReadPixels(new Rect(0, 0, destTexture.width, destTexture.height), 0, 0);
 
-        // Unpremultiply the texture
-        texture.Unpremultiply();
+        // UnPremultiply the texture
+        texture.UnPremultiply();
 
         texture.Apply();
         

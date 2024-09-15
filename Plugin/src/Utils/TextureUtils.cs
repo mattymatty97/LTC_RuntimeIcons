@@ -9,8 +9,10 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using BepInEx;
 using Unity.Mathematics;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RuntimeIcons.Utils;
 
@@ -42,12 +44,12 @@ public static class TextureUtils
     
     public static FileInfo SavePNG (this Texture2D tex, string filename = "", string directory = "")
     {
-        return SaveFile(tex.EncodeToPNG(), filename, directory, ".png");
+        return SaveFile(tex.EncodeToPNG(), filename.IsNullOrWhiteSpace() ? tex.name : filename, directory.IsNullOrWhiteSpace() ? "" : directory, ".png");
     }
     
     public static FileInfo SaveEXR (this Texture2D tex, string filename = "", string directory = "")
     {
-        return SaveFile(tex.EncodeToEXR(), filename, directory, ".exr");
+        return SaveFile(tex.EncodeToEXR(), filename.IsNullOrWhiteSpace() ? tex.name : filename, directory.IsNullOrWhiteSpace() ? "" : directory, ".exr");
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -69,7 +71,18 @@ public static class TextureUtils
         }
     }
 
-    public static void Unpremultiply(this Texture2D tex)
+    public static Texture2D GetNonPremultipliedTexture(this Texture2D tex)
+    {
+        
+        var newTex = Object.Instantiate(tex);
+        newTex.name = $"{tex.name}-NonPremultiplied";
+        
+        newTex.UnPremultiply();
+
+        return newTex;
+    }
+    
+    public static void UnPremultiply(this Texture2D tex)
     {
         var pixels = tex.GetPixelData<RGBA>(0);
         for (var i = 0; i < pixels.Length; i++)
