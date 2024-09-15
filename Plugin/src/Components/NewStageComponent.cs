@@ -488,7 +488,8 @@ public class NewStageComponent : MonoBehaviour
         // Extract the image into a new texture without mipmaps
         var texture = new Texture2D(destTexture.width, destTexture.height, GraphicsFormat.R16G16B16A16_SFloat, 1, TextureCreationFlags.DontInitializePixels)
         {
-            name = $"{nameof(RuntimeIcons)}.{StagedTransform.name}Texture"
+            name = $"{nameof(RuntimeIcons)}.{StagedTransform.name}Texture",
+            filterMode = FilterMode.Point,
         };
         
         texture.ReadPixels(new Rect(0, 0, destTexture.width, destTexture.height), 0, 0);
