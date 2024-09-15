@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace RuntimeIcons.Utils;
@@ -50,12 +51,12 @@ public static class TextureUtils
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct RGBA(float r, float g, float b, float a)
+    private struct RGBA(half r, half g, half b, half a)
     {
-        public float r = r;
-        public float g = g;
-        public float b = b;
-        public float a = a;
+        public half r = r;
+        public half g = g;
+        public half b = b;
+        public half a = a;
 
         public static implicit operator Color(RGBA color)
         {
@@ -64,10 +65,9 @@ public static class TextureUtils
 
         public static implicit operator RGBA(Color color)
         {
-
-            return new RGBA(color.r, color.g, color.b, color.a);
+            return new RGBA((half)color.r, (half)color.g, (half)color.b, (half)color.a);
         }
-    };
+    }
 
     public static void Unpremultiply(this Texture2D tex)
     {

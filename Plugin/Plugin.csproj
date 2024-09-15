@@ -38,6 +38,7 @@
         <!--<Reference Include="$(SolutionDir)\Dependencies\Assembly-CSharp.pdll" Publicize="true"/>-->
 
         <!-- clean referencing -->
+        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Mathematics.dll" Publicize="false" Private="False"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.TextMeshPro.dll" Publicize="false" Private="False"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.dll" Publicize="false" Private="False"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll" Publicize="false" Private="False"/>

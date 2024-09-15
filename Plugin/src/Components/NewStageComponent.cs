@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MattyFixes.Utils;
 using RuntimeIcons.Utils;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
@@ -464,10 +465,11 @@ public class NewStageComponent : MonoBehaviour
         _camera.backgroundColor = backgroundColor;
 
         // Get a temporary render texture and render the camera
-        var tempTexture = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGBFloat);
-        var tempTexture2 = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGB32);
-        _camera.targetTexture = tempTexture2;
-        _cameraPass.targetTexture = tempTexture;
+
+        var destTexture = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, GraphicsFormat.R16G16B16A16_SFloat);
+        var dummyTexture = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 0, RenderTextureFormat.R8);
+        _camera.targetTexture = dummyTexture;
+        _cameraPass.targetTexture = destTexture;
         using (new IsolateStageLights(PivotGo))
         {
             //Turn on the stage Lights
@@ -481,15 +483,15 @@ public class NewStageComponent : MonoBehaviour
 
         // Activate the temporary render texture
         var previouslyActiveRenderTexture = RenderTexture.active;
-        RenderTexture.active = tempTexture;
-        
+        RenderTexture.active = destTexture;
+
         // Extract the image into a new texture without mipmaps
-        var texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.RGBAFloat, 1, false)
+        var texture = new Texture2D(destTexture.width, destTexture.height, GraphicsFormat.R16G16B16A16_SFloat, 1, TextureCreationFlags.DontInitializePixels)
         {
             name = $"{nameof(RuntimeIcons)}.{StagedTransform.name}Texture"
         };
         
-        texture.ReadPixels(new Rect(0, 0, tempTexture.width, tempTexture.height), 0, 0);
+        texture.ReadPixels(new Rect(0, 0, destTexture.width, destTexture.height), 0, 0);
 
         // Unpremultiply the texture
         texture.Unpremultiply();
@@ -501,9 +503,9 @@ public class NewStageComponent : MonoBehaviour
         
         // Clean up after ourselves
         _camera.targetTexture = null;
-        RenderTexture.ReleaseTemporary(tempTexture2);
+        RenderTexture.ReleaseTemporary(dummyTexture);
         _cameraPass.targetTexture = null;
-        RenderTexture.ReleaseTemporary(tempTexture);
+        RenderTexture.ReleaseTemporary(destTexture);
         
         RuntimeIcons.Log.LogInfo($"{texture.name} Rendered");
         // Return the texture
