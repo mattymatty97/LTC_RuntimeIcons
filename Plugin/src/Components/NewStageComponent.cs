@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MattyFixes.Utils;
+using RuntimeIcons.Utils;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -463,7 +464,7 @@ public class NewStageComponent : MonoBehaviour
         _camera.backgroundColor = backgroundColor;
 
         // Get a temporary render texture and render the camera
-        var tempTexture = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGB32);
+        var tempTexture = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGBFloat);
         var tempTexture2 = RenderTexture.GetTemporary(Resolution.x, Resolution.y, 8, RenderTextureFormat.ARGB32);
         _camera.targetTexture = tempTexture2;
         _cameraPass.targetTexture = tempTexture;
@@ -483,12 +484,16 @@ public class NewStageComponent : MonoBehaviour
         RenderTexture.active = tempTexture;
         
         // Extract the image into a new texture without mipmaps
-        var texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.ARGB32,  -1,false)
+        var texture = new Texture2D(tempTexture.width, tempTexture.height, TextureFormat.RGBAFloat, 1, false)
         {
             name = $"{nameof(RuntimeIcons)}.{StagedTransform.name}Texture"
         };
         
         texture.ReadPixels(new Rect(0, 0, tempTexture.width, tempTexture.height), 0, 0);
+
+        // Unpremultiply the texture
+        texture.Unpremultiply();
+
         texture.Apply();
         
         // Reactivate the previously active render texture

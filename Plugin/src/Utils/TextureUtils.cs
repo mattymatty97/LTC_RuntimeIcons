@@ -1,4 +1,4 @@
-﻿/*
+/*
 Portion of Code from https://gist.github.com/mickdekkers/5c3c62539c057010d4497f9865060e20
 By https://github.com/mickdekkers
 As stated in this comment https://gist.github.com/mickdekkers/5c3c62539c057010d4497f9865060e20?permalink_comment_id=3253740#gistcomment-3253740
@@ -7,6 +7,7 @@ to be considered MIT licensed
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -47,8 +48,42 @@ public static class TextureUtils
     {
         return SaveFile(tex.EncodeToEXR(), filename, directory, ".exr");
     }
-    
-    
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RGBA(float r, float g, float b, float a)
+    {
+        public float r = r;
+        public float g = g;
+        public float b = b;
+        public float a = a;
+
+        public static implicit operator Color(RGBA color)
+        {
+            return new Color(color.r, color.g, color.b, color.a);
+        }
+
+        public static implicit operator RGBA(Color color)
+        {
+
+            return new RGBA(color.r, color.g, color.b, color.a);
+        }
+    };
+
+    public static void Unpremultiply(this Texture2D tex)
+    {
+        var pixels = tex.GetPixelData<RGBA>(0);
+        for (var i = 0; i < pixels.Length; i++)
+        {
+            RGBA color = pixels[i];
+            if (color.a == 0)
+                continue;
+            color.r /= color.a;
+            color.g /= color.a;
+            color.b /= color.a;
+            pixels[i] = color;
+        }
+    }
+
     public static bool IsTransparent(this Texture2D tex)
     {
         for (var x = 0; x < tex.width; x++)
