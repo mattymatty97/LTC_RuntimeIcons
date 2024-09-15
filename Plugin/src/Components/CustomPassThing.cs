@@ -14,14 +14,14 @@ public class CustomPassThing : CustomPass
     {
         shaderTags = new ShaderTagId[]
         {
-            HDShaderPassNames.s_DepthOnlyName,
             new(HDShaderPassNames.s_ShadowCasterStr),
+            HDShaderPassNames.s_DepthOnlyName,
+            HDShaderPassNames.s_TransparentDepthPrepassName,
+            HDShaderPassNames.s_TransparentBackfaceName,
             HDShaderPassNames.s_ForwardName,
             HDShaderPassNames.s_ForwardOnlyName,
             HDShaderPassNames.s_SRPDefaultUnlitName,
             HDShaderPassNames.s_DecalMeshForwardEmissiveName,
-            HDShaderPassNames.s_TransparentDepthPrepassName,
-            HDShaderPassNames.s_TransparentBackfaceName,
             HDShaderPassNames.s_TransparentDepthPostpassName,
         };
     }

@@ -115,7 +115,9 @@ internal class GrabbableObjectPatch
             var texture = RuntimeIcons.NewCameraStage.TakeSnapshot();
 
             texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
-                Paths.CachePath);
+                Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
+            texture.SaveEXR($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
+                Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR"));
             
             if (!texture.IsTransparent())
             {
