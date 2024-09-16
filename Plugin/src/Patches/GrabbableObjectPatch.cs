@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using BepInEx;
@@ -168,7 +167,7 @@ internal class GrabbableObjectPatch
             var executionOptions = new ExecutionOptions()
             {
                 VertexCache = RuntimeIcons.CameraStage.VertexCache,
-                FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+                CullingMask = RuntimeIcons.CameraStage.CullingMask,
                 LogHandler = RuntimeIcons.VerboseMeshLog,
                 OverrideMatrix = matrix
             };

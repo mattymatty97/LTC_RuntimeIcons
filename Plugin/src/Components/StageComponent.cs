@@ -53,6 +53,8 @@ public class StageComponent : MonoBehaviour
         }
     }
 
+    public int CullingMask => _camera.cullingMask;
+
     public Transform StagedTransform { get; private set; }
     
     private TransformMemory Memory { get;  set; }
@@ -198,7 +200,7 @@ public class StageComponent : MonoBehaviour
         var executionOptions = new ExecutionOptions()
         {
             VertexCache = VertexCache,
-            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            CullingMask = CullingMask,
             LogHandler = RuntimeIcons.VerboseMeshLog,
             OverrideMatrix = matrix
         };
@@ -222,7 +224,7 @@ public class StageComponent : MonoBehaviour
         var executionOptions = new ExecutionOptions()
         {
             VertexCache = VertexCache,
-            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            CullingMask = CullingMask,
             LogHandler = RuntimeIcons.VerboseMeshLog,
             OverrideMatrix = matrix
         };
