@@ -14,8 +14,9 @@ namespace RuntimeIcons.Components;
 
 public class StageComponent : MonoBehaviour
 {
-
-    private StageComponent(){}
+    private StageComponent()
+    {
+    }
 
     public IVertexCache VertexCache { get; set; } = VertexesExtensions.GlobalPartialCache;
 
@@ -36,7 +37,7 @@ public class StageComponent : MonoBehaviour
     public Transform LightTransform => LightGo.transform;
     public Transform PivotTransform => PivotGo.transform;
     private Transform CameraTransform => CameraGo.transform;
-    
+
     private Camera _camera;
     private HDAdditionalCameraData _cameraSettings;
     private CustomPassThing _cameraPass;
@@ -56,8 +57,8 @@ public class StageComponent : MonoBehaviour
     public int CullingMask => _camera.cullingMask;
 
     public Transform StagedTransform { get; private set; }
-    
-    private TransformMemory Memory { get;  set; }
+
+    private TransformMemory Memory { get; set; }
 
     private GameObject CreatePivotGo()
     {
@@ -73,9 +74,8 @@ public class StageComponent : MonoBehaviour
         return targetGo;
     }
 
-    public static StageComponent CreateStage(HideFlags hideFlags, int cameraLayerMask = 1,string stageName = "Stage")
+    public static StageComponent CreateStage(HideFlags hideFlags, int cameraLayerMask = 1, string stageName = "Stage")
     {
-        
         //create the root Object for the Stage
         var stageGo = new GameObject(stageName)
         {
@@ -86,7 +86,7 @@ public class StageComponent : MonoBehaviour
         var stageComponent = stageGo.AddComponent<StageComponent>();
 
         //add the stage Lights
-        
+
         var lightsGo = new GameObject("Stage Lights")
         {
             hideFlags = hideFlags,
@@ -98,7 +98,7 @@ public class StageComponent : MonoBehaviour
         //disable the lights by default
         lightsGo.SetActive(false);
         stageComponent.LightGo = lightsGo;
-        
+
         //add Camera
         var cameraGo = new GameObject("Camera")
         {
@@ -116,7 +116,7 @@ public class StageComponent : MonoBehaviour
 
         // Configure the Camera
         cam.cullingMask = cameraLayerMask;
-        cam.orthographic = true;
+        cam.orthographic = false;
         cam.orthographicSize = 1;
         cam.aspect = (float)stageComponent.Resolution.x / stageComponent.Resolution.y;
         cam.clearFlags = CameraClearFlags.SolidColor;
@@ -124,7 +124,7 @@ public class StageComponent : MonoBehaviour
         cam.nearClipPlane = 0.1f;
         cam.farClipPlane = 10f;
         cam.enabled = false;
-        
+
         // Add a Camera component to the GameObject
         HDAdditionalCameraData camData = cameraGo.AddComponent<HDAdditionalCameraData>();
         stageComponent._cameraSettings = camData;
@@ -141,14 +141,14 @@ public class StageComponent : MonoBehaviour
 
         var customPassVolume = cameraGo.AddComponent<CustomPassVolume>();
         customPassVolume.targetCamera = cam;
-        
+
         var customPass = (CustomPassThing)customPassVolume.AddPassOfType<CustomPassThing>();
         stageComponent._cameraPass = customPass;
-        
+
         customPass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
         customPass.targetDepthBuffer = CustomPass.TargetBuffer.Custom;
         customPass.clearFlags = ClearFlag.All;
-        
+
         return stageComponent;
     }
 
@@ -156,7 +156,7 @@ public class StageComponent : MonoBehaviour
     {
         SetObjectOnStage(targetGameObject.transform);
     }
-    
+
     public void SetObjectOnStage(GameObject targetGameObject, Quaternion rotation)
     {
         SetObjectOnStage(targetGameObject.transform);
@@ -166,27 +166,27 @@ public class StageComponent : MonoBehaviour
     {
         SetObjectOnStage(targetTransform, targetTransform.rotation);
     }
-    
+
     public void SetObjectOnStage(Transform targetTransform, Quaternion rotation)
     {
         if (StagedTransform && StagedTransform != targetTransform)
             throw new InvalidOperationException("An Object is already on stage!");
-        
+
         RuntimeIcons.Log.LogInfo($"Setting stage for {targetTransform.name}");
-        
+
         PivotTransform.parent = null;
         PivotTransform.position = targetTransform.position;
         PivotTransform.rotation = Quaternion.identity;
         SceneManager.MoveGameObjectToScene(PivotGo, targetTransform.gameObject.scene);
-        
+
         StagedTransform = targetTransform;
-        
+
         Memory = new TransformMemory(StagedTransform);
-        
+
         StagedTransform.SetParent(PivotTransform, false);
         StagedTransform.localPosition = Vector3.zero;
     }
-    
+
     public void CenterObjectOnPivot(Quaternion? overrideRotation = null)
     {
         if (!StagedTransform)
@@ -194,9 +194,9 @@ public class StageComponent : MonoBehaviour
 
         if (overrideRotation.HasValue)
             StagedTransform.rotation = overrideRotation.Value;
-        
+
         var matrix = Matrix4x4.TRS(Vector3.zero, StagedTransform.rotation, StagedTransform.localScale);
-        
+
         var executionOptions = new ExecutionOptions()
         {
             VertexCache = VertexCache,
@@ -204,23 +204,23 @@ public class StageComponent : MonoBehaviour
             LogHandler = RuntimeIcons.VerboseMeshLog,
             OverrideMatrix = matrix
         };
-        
+
         if (!StagedTransform.gameObject.TryGetBounds(out var bounds, executionOptions))
             throw new InvalidOperationException("This object has no Renders!");
-        
+
         StagedTransform.localPosition = -bounds.center;
-        
-        RuntimeIcons.Log.LogInfo($"StagedObject offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
-        
+
+        RuntimeIcons.Log.LogInfo(
+            $"StagedObject offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
     }
-    
+
     public void FindOptimalOffsetAndScale()
     {
         if (!StagedTransform)
             throw new InvalidOperationException("No Object on stage!");
-        
+
         var matrix = Matrix4x4.TRS(Vector3.zero, PivotTransform.rotation, Vector3.one);
-        
+
         var executionOptions = new ExecutionOptions()
         {
             VertexCache = VertexCache,
@@ -228,42 +228,38 @@ public class StageComponent : MonoBehaviour
             LogHandler = RuntimeIcons.VerboseMeshLog,
             OverrideMatrix = matrix
         };
+
+        var vertexes = PivotGo.GetVertexes(executionOptions);
         
-        if (!PivotGo.TryGetBounds(out var bounds, executionOptions))
+        if (vertexes.Length == 0)
             throw new InvalidOperationException("This object has no Renders!");
+
+        var bounds = vertexes.GetBounds();
         
         if (bounds.size == Vector3.zero)
             throw new InvalidOperationException("This object has no Bounds!");
-        
-        // Calculate the visible world area based on the camera's orthographic size and aspect ratio
-        var cameraHeight = 2f * _camera.orthographicSize; // Total height in world units (orthographicSize is half the height)
-        var cameraWidth = cameraHeight * _camera.aspect;
-        var targetWorldArea = new Vector2(cameraWidth, cameraHeight);
 
-        // Calculate the scale factor considering the object's distance from the camera
-        // also add some padding from the sides
-        var scaleFactorX = (targetWorldArea.x - 0.2f) / bounds.size.x;
-        var scaleFactorY = (targetWorldArea.y - 0.2f) / bounds.size.y;
-        var scaleFactor = Mathf.Min(scaleFactorX, scaleFactorY);
-        
-        // Apply the calculated scale factor
-        var scale = Vector3.one * scaleFactor;
-        
-        // Calculate the new bounds size after applying scale
-        var scaledSize = Vector3.Scale(bounds.size, scale);
-        var scaledCenter = Vector3.Scale(bounds.center, scale);
+        var distanceToCamera = _camera.nearClipPlane + bounds.extents.z;
 
-        // Calculate the desired Z position to prevent clipping
-        var distanceToMove = Mathf.Max(scaledSize.z + _camera.nearClipPlane, 1f);
+        var localOffset = new Vector3(-bounds.center.x, -bounds.center.y, distanceToCamera);
 
-        // Calculate the offset in the camera's local space
-        var localOffset = new Vector3(-scaledCenter.x, -scaledCenter.y, distanceToMove);
+        var inverse = matrix.inverse;
+
+        var camera_bounds = vertexes.Select(inverse.MultiplyPoint3x4).Select(PivotTransform.localToWorldMatrix.MultiplyPoint3x4)
+            .Select(_camera.WorldToViewportPoint).GetBounds();
+
+        var cameraAngle = (camera_bounds.center - Vector3.one * 0.5f) * _camera.fieldOfView;
+
+        CameraTransform.rotation = Quaternion.Euler(0f, cameraAngle.x, cameraAngle.y);
         
-        RuntimeIcons.Log.LogInfo($"Stage offset {localOffset} scale {scale}");
+        _camera.fieldOfView *= Mathf.Max(Mathf.Max(camera_bounds.max.x, Mathf.Abs(camera_bounds.min.x)) - camera_bounds.center.x,
+            Mathf.Max(camera_bounds.max.y, Mathf.Abs(camera_bounds.min.y)) - camera_bounds.center.y);
+
+        
+        RuntimeIcons.Log.LogInfo($"Stage offset {localOffset}");
 
         PivotTransform.position = transform.position + localOffset;
-        PivotTransform.localScale = scale;
-        
+
         LightTransform.position = PivotTransform.position;
     }
 
@@ -274,12 +270,12 @@ public class StageComponent : MonoBehaviour
             StagedTransform.SetParent(Memory.Parent, false);
 
             StagedTransform.localScale = Memory.LocalScale;
-            StagedTransform.SetLocalPositionAndRotation(Memory.LocalPosition,Memory.LocalRotation);
+            StagedTransform.SetLocalPositionAndRotation(Memory.LocalPosition, Memory.LocalRotation);
         }
 
         StagedTransform = null;
         Memory = default;
-        
+
         PivotTransform.parent = null;
         PivotTransform.position = transform.position;
         PivotTransform.rotation = Quaternion.identity;
@@ -291,7 +287,7 @@ public class StageComponent : MonoBehaviour
     {
         return TakeSnapshot(Color.clear);
     }
-    
+
     public Texture2D TakeSnapshot(Color backgroundColor)
     {
         // Set the background color of the camera
@@ -307,9 +303,9 @@ public class StageComponent : MonoBehaviour
         {
             //Turn on the stage Lights
             LightGo.SetActive(true);
-            
+
             _camera.Render();
-            
+
             //Turn off the stage Lights
             LightGo.SetActive(false);
         }
@@ -319,28 +315,29 @@ public class StageComponent : MonoBehaviour
         RenderTexture.active = destTexture;
 
         // Extract the image into a new texture without mipmaps
-        var texture = new Texture2D(destTexture.width, destTexture.height, GraphicsFormat.R16G16B16A16_SFloat, 1, TextureCreationFlags.DontInitializePixels)
+        var texture = new Texture2D(destTexture.width, destTexture.height, GraphicsFormat.R16G16B16A16_SFloat, 1,
+            TextureCreationFlags.DontInitializePixels)
         {
             name = $"{nameof(RuntimeIcons)}.{StagedTransform.name}Texture",
             filterMode = FilterMode.Point,
         };
-        
+
         texture.ReadPixels(new Rect(0, 0, destTexture.width, destTexture.height), 0, 0);
 
         // UnPremultiply the texture
         texture.UnPremultiply();
 
         texture.Apply();
-        
+
         // Reactivate the previously active render texture
         RenderTexture.active = previouslyActiveRenderTexture;
-        
+
         // Clean up after ourselves
         _camera.targetTexture = null;
         RenderTexture.ReleaseTemporary(dummyTexture);
         _cameraPass.targetTexture = null;
         RenderTexture.ReleaseTemporary(destTexture);
-        
+
         RuntimeIcons.Log.LogInfo($"{texture.name} Rendered");
         // Return the texture
         return texture;
@@ -350,7 +347,7 @@ public class StageComponent : MonoBehaviour
     {
         private readonly HashSet<Light> _lightMemory;
         private readonly Color _ambientLight;
-        
+
         public IsolateStageLights(GameObject stagePivot)
         {
             _lightMemory = UnityEngine.Pool.HashSetPool<Light>.Get();
@@ -360,7 +357,8 @@ public class StageComponent : MonoBehaviour
 
             var localLights = stagePivot.GetComponentsInChildren<Light>();
 
-            var globalLights = FindObjectsOfType<Light>().Where(l => !localLights.Contains(l)).Where(l => l.enabled).ToArray();
+            var globalLights = FindObjectsOfType<Light>().Where(l => !localLights.Contains(l)).Where(l => l.enabled)
+                .ToArray();
 
             foreach (var light in globalLights)
             {
@@ -372,7 +370,7 @@ public class StageComponent : MonoBehaviour
         public void Dispose()
         {
             RenderSettings.ambientLight = _ambientLight;
-            
+
             foreach (var light in _lightMemory)
             {
                 light.enabled = true;
@@ -397,5 +395,4 @@ public class StageComponent : MonoBehaviour
             this.LocalScale = target.localScale;
         }
     }
-
 }
