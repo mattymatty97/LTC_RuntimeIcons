@@ -134,9 +134,7 @@ public class StageComponent : MonoBehaviour
         camData.backgroundColorHDR = Color.clear;
         camData.customRenderingSettings = true;
         camData.customRenderingSettings = true;
-        var overrideMask = camData.renderingPathCustomFrameSettingsOverrideMask;
-        overrideMask.mask[(uint)FrameSettingsField.DecalLayers] = true;
-        camData.renderingPathCustomFrameSettingsOverrideMask = overrideMask;
+        camData.renderingPathCustomFrameSettingsOverrideMask.mask[(uint)FrameSettingsField.DecalLayers] = true;
         camData.renderingPathCustomFrameSettings.SetEnabled(FrameSettingsField.DecalLayers, false);
 
         var customPassVolume = cameraGo.AddComponent<CustomPassVolume>();
