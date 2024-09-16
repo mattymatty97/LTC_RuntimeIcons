@@ -131,7 +131,7 @@ namespace RuntimeIcons
                 lightData.distance = 150000000000;
                 lightData.fadeDistance = 10000;
                 lightData.innerSpotPercent = 82.7f;
-                lightData.intensity = 50f;
+                lightData.intensity = 75f;
 
                 // add front light ( similar to ceiling one but facing a 45 angle )
                 var lightGo2 = new GameObject("SpotLight 2")
@@ -169,7 +169,7 @@ namespace RuntimeIcons
                 lightData2.distance = 150000000000;
                 lightData2.fadeDistance = 10000;
                 lightData2.innerSpotPercent = 82.7f;
-                lightData2.intensity = 30f;
+                lightData2.intensity = 50f;
                 lightData2.shapeRadius = 0.5f;
 
                 // add a second front light ( similar to the other one but does not have Specular )
@@ -208,7 +208,7 @@ namespace RuntimeIcons
                 lightData3.distance = 150000000000;
                 lightData3.fadeDistance = 10000;
                 lightData3.innerSpotPercent = 82.7f;
-                lightData3.intensity = 10f;
+                lightData3.intensity = 30f;
         }
     }
 }
