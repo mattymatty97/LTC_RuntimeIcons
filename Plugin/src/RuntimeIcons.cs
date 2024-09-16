@@ -114,7 +114,7 @@ namespace RuntimeIcons
                 light.color = Color.white;
                 light.colorTemperature = 6901;
                 light.useColorTemperature = true;
-                light.shadows = LightShadows.Hard;
+                light.shadows = LightShadows.Soft;
                 light.spotAngle = 50.0f;
                 light.innerSpotAngle = 21.8f;
                 light.range = 7.11f;
@@ -131,7 +131,7 @@ namespace RuntimeIcons
                 lightData.distance = 150000000000;
                 lightData.fadeDistance = 10000;
                 lightData.innerSpotPercent = 82.7f;
-                lightData.intensity = 500f;
+                lightData.intensity = 50f;
 
                 // add front light ( similar to ceiling one but facing a 45 angle )
                 var lightGo2 = new GameObject("SpotLight 2")
@@ -152,7 +152,7 @@ namespace RuntimeIcons
                 light2.color = Color.white;
                 light2.colorTemperature = 6901;
                 light2.useColorTemperature = true;
-                light2.shadows = LightShadows.Hard;
+                light2.shadows = LightShadows.Soft;
                 light2.spotAngle = 50.0f;
                 light2.innerSpotAngle = 21.8f;
                 light2.range = 7.11f;
@@ -169,7 +169,7 @@ namespace RuntimeIcons
                 lightData2.distance = 150000000000;
                 lightData2.fadeDistance = 10000;
                 lightData2.innerSpotPercent = 82.7f;
-                lightData2.intensity = 300f;
+                lightData2.intensity = 30f;
                 lightData2.shapeRadius = 0.5f;
 
                 // add a second front light ( similar to the other one but does not have Specular )
@@ -191,7 +191,7 @@ namespace RuntimeIcons
                 light3.color = Color.white;
                 light3.colorTemperature = 6901;
                 light3.useColorTemperature = true;
-                light3.shadows = LightShadows.Hard;
+                light3.shadows = LightShadows.Soft;
                 light3.spotAngle = 50.0f;
                 light3.innerSpotAngle = 21.8f;
                 light3.range = 7.11f;
@@ -208,7 +208,7 @@ namespace RuntimeIcons
                 lightData3.distance = 150000000000;
                 lightData3.fadeDistance = 10000;
                 lightData3.innerSpotPercent = 82.7f;
-                lightData3.intensity = 75f;
+                lightData3.intensity = 10f;
         }
     }
 }
