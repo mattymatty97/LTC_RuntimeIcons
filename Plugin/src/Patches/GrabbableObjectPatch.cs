@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using BepInEx;
 using HarmonyLib;
 using RuntimeIcons.Utils;
 using UnityEngine;
+using VertexLibrary;
 using Object = UnityEngine.Object;
 
 namespace RuntimeIcons.Patches;
@@ -108,13 +110,17 @@ internal class GrabbableObjectPatch
 
         try
         {
-            RuntimeIcons.NewCameraStage.SetItemOnStage(grabbableObject);
+            var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset + 90f, grabbableObject.itemProperties.restingRotation.z);
+            
+            RuntimeIcons.CameraStage.SetObjectOnStage(grabbableObject.NetworkObject.gameObject);
+            
+            RuntimeIcons.CameraStage.CenterObjectOnPivot(rotation);
 
-            RuntimeIcons.NewCameraStage.FindOptimalRotation();
+            FindOptimalRotation(grabbableObject);
                 
-            RuntimeIcons.NewCameraStage.FindOptimalOffsetAndScale();
+            RuntimeIcons.CameraStage.FindOptimalOffsetAndScale();
 
-            var texture = RuntimeIcons.NewCameraStage.TakeSnapshot();
+            var texture = RuntimeIcons.CameraStage.TakeSnapshot();
 
             texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
@@ -141,13 +147,92 @@ internal class GrabbableObjectPatch
         {
             RuntimeIcons.Log.LogInfo($"{grabbableObject.itemProperties.itemName} now has a new icon");
             //RuntimeIcons.CameraStage.ResetStage();
-            RuntimeIcons.NewCameraStage.ResetStage();
+            RuntimeIcons.CameraStage.ResetStage();
         }
+    }
+    
+    public static void FindOptimalRotation(GrabbableObject grabbable)
+    {
+        var pivotTransform = RuntimeIcons.CameraStage.PivotTransform;
+        
+        if (PluginConfig.RotationOverrides.TryGetValue(grabbable.itemProperties.itemName,
+                out var rotations))
+        {
+            pivotTransform.Rotate(rotations, Space.World);
+        }
+        else
+        {
+            pivotTransform.rotation = Quaternion.identity;
+            var matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one);
+            
+            var executionOptions = new ExecutionOptions()
+            {
+                VertexCache = RuntimeIcons.CameraStage.VertexCache,
+                FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+                LogHandler = RuntimeIcons.VerboseMeshLog,
+                OverrideMatrix = matrix
+            };
+            
+            if (!pivotTransform.TryGetBounds(out var bounds, executionOptions))
+                throw new InvalidOperationException("This object has no Renders!");
+
+            if (bounds.size == Vector3.zero)
+                throw new InvalidOperationException("This object has no Bounds!");
+
+            if (bounds.extents.y < bounds.extents.x / 2f && bounds.extents.y <  bounds.extents.z / 2f)
+            {
+                RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -75 x");
+                pivotTransform.Rotate(Vector3.right, -75, Space.World);
+
+                if (bounds.extents.z < bounds.extents.x * 0.5f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 45 z | 1");
+                    pivotTransform.Rotate(Vector3.forward, 45, Space.World);
+                }
+                else if (bounds.extents.z < bounds.extents.x * 0.85f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 90 z | 1");
+                    pivotTransform.Rotate(Vector3.forward, 90, Space.World);
+                }
+                else if (bounds.extents.x < bounds.extents.z * 0.5f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 90 z | 2");
+                    pivotTransform.Rotate(Vector3.forward, 45, Space.World);
+                }
+            }
+            else
+            {
+                RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -25 x");
+                pivotTransform.Rotate(Vector3.right, -25, Space.World);
+
+                if (bounds.extents.x < bounds.extents.z * 0.85f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -45 y");
+                    pivotTransform.Rotate(Vector3.up, -45, Space.World);
+                }
+                else if ((bounds.extents.y - bounds.extents.z) / Math.Abs(bounds.extents.z) < 0.01f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 25 x");
+                    pivotTransform.Rotate(Vector3.right, 25, Space.World);
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 25 z");
+                    pivotTransform.Rotate(Vector3.forward, 25, Space.World);
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -45 y");
+                    pivotTransform.Rotate(Vector3.up, -45, Space.World);
+                }
+                else if (bounds.extents.y < bounds.extents.x / 2f || bounds.extents.x < bounds.extents.y / 2f)
+                {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 45 z");
+                    pivotTransform.Rotate(Vector3.forward, 45, Space.World);
+                }
+            }
+        }
+
+        RuntimeIcons.Log.LogInfo($"Stage rotation {pivotTransform.localRotation.eulerAngles}");
     }
 
     private static void UpdateIconsInHUD(Item item)
     {
-        if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null)
+        if (!GameNetworkManager.Instance || !GameNetworkManager.Instance.localPlayerController)
             return;
 
         var itemSlots = GameNetworkManager.Instance.localPlayerController.ItemSlots;
