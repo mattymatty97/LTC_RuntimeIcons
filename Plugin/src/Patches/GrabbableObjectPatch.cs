@@ -134,12 +134,31 @@ internal class GrabbableObjectPatch
                 RuntimeIcons.Log.LogError($"{grabbableObject.itemProperties.itemName} Generated Empty Sprite!");
                 grabbableObject.itemProperties.itemIcon = BrokenSprite;
             }
+
+            UpdateIconsInHUD(grabbableObject.itemProperties);
         }
         finally
         {
             RuntimeIcons.Log.LogInfo($"{grabbableObject.itemProperties.itemName} now has a new icon");
             //RuntimeIcons.CameraStage.ResetStage();
             RuntimeIcons.NewCameraStage.ResetStage();
+        }
+    }
+
+    private static void UpdateIconsInHUD(Item item)
+    {
+        if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null)
+            return;
+
+        var itemSlots = GameNetworkManager.Instance.localPlayerController.ItemSlots;
+        var itemSlotIcons = HUDManager.Instance.itemSlotIcons;
+        for (var i = 0; i < itemSlots.Length; i++)
+        {
+            if (i >= itemSlotIcons.Length)
+                break;
+            if (!itemSlots[i] || itemSlots[i].itemProperties != item)
+                continue;
+            itemSlotIcons[i].sprite = item.itemIcon;
         }
     }
 }

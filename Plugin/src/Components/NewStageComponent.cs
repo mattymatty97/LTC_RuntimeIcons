@@ -105,8 +105,8 @@ public class NewStageComponent : MonoBehaviour
         light.color = Color.white;
         light.colorTemperature = 6901;
         light.useColorTemperature = true;
-        light.shadows = LightShadows.None;
-        light.spotAngle = 160.0f;
+        light.shadows = LightShadows.Hard;
+        light.spotAngle = 50.0f;
         light.innerSpotAngle = 21.8f;
         light.range = 7.11f;
         
@@ -117,6 +117,7 @@ public class NewStageComponent : MonoBehaviour
         lightData.applyRangeAttenuation = true;
         lightData.color = Color.white;
         lightData.colorShadow = true;
+        lightData.shadowDimmer = 0.8f;
         lightData.customSpotLightShadowCone = 30f;
         lightData.distance = 150000000000;
         lightData.fadeDistance = 10000;
@@ -142,8 +143,8 @@ public class NewStageComponent : MonoBehaviour
         light2.color = Color.white;
         light2.colorTemperature = 6901;
         light2.useColorTemperature = true;
-        light2.shadows = LightShadows.None;
-        light2.spotAngle = 160.0f;
+        light2.shadows = LightShadows.Hard;
+        light2.spotAngle = 50.0f;
         light2.innerSpotAngle = 21.8f;
         light2.range = 7.11f;
         
@@ -154,6 +155,7 @@ public class NewStageComponent : MonoBehaviour
         lightData2.applyRangeAttenuation = true;
         lightData2.color = Color.white;
         lightData2.colorShadow = true;
+        lightData2.shadowDimmer = 0.6f;
         lightData2.customSpotLightShadowCone = 30f;
         lightData2.distance = 150000000000;
         lightData2.fadeDistance = 10000;
@@ -180,8 +182,8 @@ public class NewStageComponent : MonoBehaviour
         light3.color = Color.white;
         light3.colorTemperature = 6901;
         light3.useColorTemperature = true;
-        light3.shadows = LightShadows.None;
-        light3.spotAngle = 160.0f;
+        light3.shadows = LightShadows.Hard;
+        light3.spotAngle = 50.0f;
         light3.innerSpotAngle = 21.8f;
         light3.range = 7.11f;
         
@@ -192,6 +194,7 @@ public class NewStageComponent : MonoBehaviour
         lightData3.applyRangeAttenuation = true;
         lightData3.color = Color.white;
         lightData3.colorShadow = true;
+        lightData3.shadowDimmer = 0.4f;
         lightData3.customSpotLightShadowCone = 30f;
         lightData3.distance = 150000000000;
         lightData3.fadeDistance = 10000;
