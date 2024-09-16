@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using BepInEx;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using Object = UnityEngine.Object;
 
 namespace RuntimeIcons.Utils;
@@ -84,6 +85,9 @@ public static class TextureUtils
     
     public static void UnPremultiply(this Texture2D tex)
     {
+        if (tex.graphicsFormat != GraphicsFormat.R16G16B16A16_SFloat)
+            throw new NotImplementedException("Texture to un-premultiply must have 16-bit floating point components");
+
         var pixels = tex.GetPixelData<RGBA>(0);
         for (var i = 0; i < pixels.Length; i++)
         {
