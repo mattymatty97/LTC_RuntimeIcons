@@ -116,7 +116,7 @@ public class StageComponent : MonoBehaviour
         cam.cullingMask = cameraLayerMask;
         cam.orthographic = true;
         cam.orthographicSize = 1;
-        cam.aspect = 1;
+        cam.aspect = (float)stageComponent.Resolution.x / stageComponent.Resolution.y;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = Color.clear;
         cam.nearClipPlane = 0.1f;
