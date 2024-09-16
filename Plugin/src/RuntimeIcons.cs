@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
-using RuntimeIcons.Dependency;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using MonoMod.RuntimeDetour;
 using RuntimeIcons.Components;
+using RuntimeIcons.Dependency;
 using UnityEngine;
 
 namespace RuntimeIcons
 {
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency("VertexLibrary", "0.0.1")]
     [BepInDependency("BMX.LobbyCompatibility", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ainavt.lc.lethalconfig", Flags: BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency("mattymatty.MattyFixes", "1.1.21")]
     internal class RuntimeIcons : BaseUnityPlugin
     {
         internal static readonly ISet<Hook> Hooks = new HashSet<Hook>();
@@ -30,6 +30,31 @@ namespace RuntimeIcons
         //internal static SnapshotCamera SnapshotCamera;
         //internal static StageComponent CameraStage;
         internal static NewStageComponent NewCameraStage;
+        
+        internal static void VerboseMeshLog(LogType logLevel, Func<string> message)
+        {
+            LogLevel level;
+            switch (logLevel)
+            {
+                case LogType.Error:
+                case LogType.Assert:
+                case LogType.Exception:
+                    level = LogLevel.Error;
+                    break;
+                case LogType.Warning:
+                    level = LogLevel.Warning;
+                    break;
+                default:
+                    level = LogLevel.Info;
+                    break;
+            } 
+            VerboseMeshLog(level, message);
+        }
+    
+        internal static void VerboseMeshLog(LogLevel logLevel, Func<string> message)
+        {
+            Log.Log(logLevel, message());
+        }
 
         private void Awake()
         {

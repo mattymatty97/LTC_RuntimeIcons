@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MattyFixes.Utils;
 using RuntimeIcons.Utils;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
+using VertexLibrary;
 
 namespace RuntimeIcons.Components;
 
@@ -274,7 +274,16 @@ public class NewStageComponent : MonoBehaviour
         var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset + 90f, grabbableObject.itemProperties.restingRotation.z);
         
         var matrix = Matrix4x4.TRS(Vector3.zero, rotation, StagedTransform.localScale);
-        if (!objectToAdjust.TryGetBounds(out var bounds, matrix))
+        
+        var executionOptions = new ExecutionOptions()
+        {
+            VertexCache = VertexesExtensions.GlobalPartialCache,
+            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            LogHandler = RuntimeIcons.VerboseMeshLog,
+            OverrideMatrix = matrix
+        };
+        
+        if (!objectToAdjust.TryGetBounds(out var bounds, executionOptions))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
@@ -305,7 +314,16 @@ public class NewStageComponent : MonoBehaviour
         StagedTransform = targetTransform;
         
         var matrix = Matrix4x4.TRS(Vector3.zero, targetTransform.rotation, targetTransform.localScale);
-        if (!targetTransform.gameObject.TryGetBounds(out var bounds, matrix))
+        
+        var executionOptions = new ExecutionOptions()
+        {
+            VertexCache = VertexesExtensions.GlobalPartialCache,
+            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            LogHandler = RuntimeIcons.VerboseMeshLog,
+            OverrideMatrix = matrix
+        };
+        
+        if (!targetTransform.gameObject.TryGetBounds(out var bounds, executionOptions))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
@@ -333,7 +351,16 @@ public class NewStageComponent : MonoBehaviour
                PivotTransform.Rotate(_camera.transform.up, 90, Space.World);*/
 
             var matrix = Matrix4x4.TRS(Vector3.zero, PivotTransform.rotation, Vector3.one);
-            if (!VerticesExtensions.TryGetBounds(PivotGo, out var bounds, matrix))
+            
+            var executionOptions = new ExecutionOptions()
+            {
+                VertexCache = VertexesExtensions.GlobalPartialCache,
+                FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+                LogHandler = RuntimeIcons.VerboseMeshLog,
+                OverrideMatrix = matrix
+            };
+            
+            if (!PivotGo.TryGetBounds(out var bounds, executionOptions))
                 throw new InvalidOperationException("This object has no Renders!");
 
             if (bounds.size == Vector3.zero)
@@ -397,7 +424,16 @@ public class NewStageComponent : MonoBehaviour
             throw new InvalidOperationException("No Object on stage!");
         
         var matrix = Matrix4x4.TRS(Vector3.zero, PivotTransform.rotation, Vector3.one);
-        if (!VerticesExtensions.TryGetBounds(PivotGo, out var bounds, matrix))
+        
+        var executionOptions = new ExecutionOptions()
+        {
+            VertexCache = VertexesExtensions.GlobalPartialCache,
+            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            LogHandler = RuntimeIcons.VerboseMeshLog,
+            OverrideMatrix = matrix
+        };
+        
+        if (!PivotGo.TryGetBounds(out var bounds, executionOptions))
             throw new InvalidOperationException("This object has no Renders!");
         
         if (bounds.size == Vector3.zero)

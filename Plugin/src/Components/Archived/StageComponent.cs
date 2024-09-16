@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using VertexLibrary;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace RuntimeIcons.Components;
@@ -36,7 +39,16 @@ public class StageComponent : MonoBehaviour
         var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset, grabbableObject.itemProperties.restingRotation.z);
         
         var matrix = Matrix4x4.TRS(Vector3.zero, rotation, StagedTransform.localScale);
-        if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(objectToAdjust, out var bounds, matrix))
+        
+        var executionOptions = new ExecutionOptions()
+        {
+            VertexCache = VertexesExtensions.GlobalPartialCache,
+            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            LogHandler = RuntimeIcons.VerboseMeshLog,
+            OverrideMatrix = matrix
+        };
+        
+        if (!objectToAdjust.TryGetBounds(out var bounds, executionOptions))
             throw new InvalidOperationException("This object has no Renders!");
 
         Memory = new TransformMemory(StagedTransform);
@@ -66,7 +78,16 @@ public class StageComponent : MonoBehaviour
                 transform.Rotate(camera.transform.up, -135, Space.World);
 
             var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, Vector3.one);
-            if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(gameObject, out var bounds, matrix))
+            
+            var executionOptions = new ExecutionOptions()
+            {
+                VertexCache = VertexesExtensions.GlobalPartialCache,
+                FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+                LogHandler = RuntimeIcons.VerboseMeshLog,
+                OverrideMatrix = matrix
+            };
+            
+            if (!gameObject.TryGetBounds(out var bounds, executionOptions))
                 throw new InvalidOperationException("This object has no Renders!");
 
             if (bounds.size == Vector3.zero)
@@ -97,7 +118,16 @@ public class StageComponent : MonoBehaviour
             throw new InvalidOperationException("No Object on stage!");
         
         var matrix = Matrix4x4.TRS(Vector3.zero, transform.rotation, Vector3.one);
-        if (!MattyFixes.Utils.VerticesExtensions.TryGetBounds(gameObject, out var bounds, matrix))
+        
+        var executionOptions = new ExecutionOptions()
+        {
+            VertexCache = VertexesExtensions.GlobalPartialCache,
+            FilteredComponents = new HashSet<Type> { typeof(ScanNodeProperties) },
+            LogHandler = RuntimeIcons.VerboseMeshLog,
+            OverrideMatrix = matrix
+        };
+        
+        if (!gameObject.TryGetBounds(out var bounds, executionOptions))
             throw new InvalidOperationException("This object has no Renders!");
         
         if (bounds.size == Vector3.zero)
