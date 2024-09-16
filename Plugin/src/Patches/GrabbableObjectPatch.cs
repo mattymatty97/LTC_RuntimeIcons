@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using BepInEx;
 using HarmonyLib;
+using RuntimeIcons.Components;
 using RuntimeIcons.Utils;
 using UnityEngine;
 using VertexLibrary;
@@ -12,7 +13,7 @@ using Object = UnityEngine.Object;
 namespace RuntimeIcons.Patches;
 
 [HarmonyPatch]
-internal class GrabbableObjectPatch
+internal static class GrabbableObjectPatch
 {
 
     internal static Sprite BrokenSprite { get; set; }
@@ -115,7 +116,7 @@ internal class GrabbableObjectPatch
             
             RuntimeIcons.CameraStage.CenterObjectOnPivot(rotation);
 
-            FindOptimalRotation(grabbableObject);
+            RuntimeIcons.CameraStage.FindOptimalRotation(grabbableObject);
                 
             RuntimeIcons.CameraStage.FindOptimalOffsetAndScale();
 
@@ -150,9 +151,9 @@ internal class GrabbableObjectPatch
         }
     }
     
-    public static void FindOptimalRotation(GrabbableObject grabbable)
+    public static void FindOptimalRotation(this StageComponent stage, GrabbableObject grabbable)
     {
-        var pivotTransform = RuntimeIcons.CameraStage.PivotTransform;
+        var pivotTransform = stage.PivotTransform;
         
         if (PluginConfig.RotationOverrides.TryGetValue(grabbable.itemProperties.itemName,
                 out var rotations))
@@ -166,8 +167,8 @@ internal class GrabbableObjectPatch
             
             var executionOptions = new ExecutionOptions()
             {
-                VertexCache = RuntimeIcons.CameraStage.VertexCache,
-                CullingMask = RuntimeIcons.CameraStage.CullingMask,
+                VertexCache = stage.VertexCache,
+                CullingMask = stage.CullingMask,
                 LogHandler = RuntimeIcons.VerboseMeshLog,
                 OverrideMatrix = matrix
             };
