@@ -275,8 +275,20 @@ public class StageComponent : MonoBehaviour
 
             var worldVertexes = localVertexes.Select(PivotTransform.localToWorldMatrix.MultiplyPoint3x4).ToArray();
             
-            GetCameraAngles(_camera, _camera.transform.right, worldVertexes, out var angleMinY, out var angleMaxY);
-            GetCameraAngles(_camera, -_camera.transform.up, worldVertexes, out var angleMinX, out var angleMaxX);
+            float angleMinX, angleMaxX;
+            float angleMinY, angleMaxY;
+            
+            for (var i = 0; i < 5; i++)
+            {
+                GetCameraAngles(_camera, _camera.transform.right, worldVertexes, out angleMinY, out angleMaxY);
+                CameraTransform.Rotate(Vector3.up, (angleMinY + angleMaxY) / 2, Space.World);
+    
+                GetCameraAngles(_camera, -_camera.transform.up, worldVertexes, out angleMinX, out angleMaxX);
+                CameraTransform.Rotate(Vector3.right, (angleMinX + angleMaxX) / 2, Space.Self);
+            }
+            
+            GetCameraAngles(_camera, _camera.transform.right, worldVertexes, out angleMinY, out angleMaxY);
+            GetCameraAngles(_camera, -_camera.transform.up, worldVertexes, out angleMinX, out angleMaxX);
 
             var fovAngleX = Math.Max(-angleMinX, angleMaxX) * 2;
             var fovAngleY = Camera.HorizontalToVerticalFieldOfView(Math.Max(-angleMinY, angleMaxY) * 2, _camera.aspect);
@@ -305,6 +317,7 @@ public class StageComponent : MonoBehaviour
         PivotTransform.parent = null;
         PivotTransform.position = transform.position;
         PivotTransform.rotation = Quaternion.identity;
+        CameraTransform.rotation = Quaternion.identity;
         LightTransform.localPosition = Vector3.zero;
         LightTransform.rotation = Quaternion.identity;
     }
