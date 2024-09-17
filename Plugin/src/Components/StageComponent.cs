@@ -39,7 +39,7 @@ public class StageComponent : MonoBehaviour
     
     private Camera _camera;
     private HDAdditionalCameraData _cameraSettings;
-    private CustomPassThing _cameraPass;
+    private TransparentRenderTexturePass _cameraPass;
     private GameObject _targetGo;
     private Vector2Int _resolution = new Vector2Int(128, 128);
 
@@ -141,7 +141,7 @@ public class StageComponent : MonoBehaviour
         var customPassVolume = cameraGo.AddComponent<CustomPassVolume>();
         customPassVolume.targetCamera = cam;
         
-        var customPass = (CustomPassThing)customPassVolume.AddPassOfType<CustomPassThing>();
+        var customPass = (TransparentRenderTexturePass)customPassVolume.AddPassOfType<TransparentRenderTexturePass>();
         stageComponent._cameraPass = customPass;
         
         customPass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
