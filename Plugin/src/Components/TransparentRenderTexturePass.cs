@@ -3,6 +3,8 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering.RendererUtils;
 
+namespace RuntimeIcons.Components;
+
 public class TransparentRenderTexturePass : CustomPass
 {
     public RenderTexture targetTexture;
