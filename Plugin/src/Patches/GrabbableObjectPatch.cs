@@ -181,49 +181,55 @@ internal static class GrabbableObjectPatch
 
             if (bounds.extents.y < bounds.extents.x / 2f && bounds.extents.y <  bounds.extents.z / 2f)
             {
-                RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -75 x");
-                pivotTransform.Rotate(Vector3.right, -75, Space.World);
-
                 if (bounds.extents.z < bounds.extents.x * 0.5f)
                 {
                     RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 45 z | 1");
-                    pivotTransform.Rotate(Vector3.forward, 45, Space.World);
+                    pivotTransform.Rotate(Vector3.right, 45, Space.World);
                 }
                 else if (bounds.extents.z < bounds.extents.x * 0.85f)
                 {
                     RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 90 z | 1");
-                    pivotTransform.Rotate(Vector3.forward, 90, Space.World);
+                    pivotTransform.Rotate(Vector3.right, 90, Space.World);
                 }
                 else if (bounds.extents.x < bounds.extents.z * 0.5f)
                 {
                     RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 90 z | 2");
-                    pivotTransform.Rotate(Vector3.forward, 45, Space.World);
+                    pivotTransform.Rotate(Vector3.right, 45, Space.World);
                 }
+                
+                RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -75 x");
+                pivotTransform.Rotate(Vector3.right, -75, Space.World);
+                
+                RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -15 y");
+                pivotTransform.Rotate(Vector3.up, -15, Space.World);
             }
             else
             {
-                RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -25 x");
-                pivotTransform.Rotate(Vector3.right, -25, Space.World);
-
                 if (bounds.extents.x < bounds.extents.z * 0.85f)
                 {
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -25 x");
+                    pivotTransform.Rotate(Vector3.right, -25, Space.World);
+                    
                     RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -45 y");
                     pivotTransform.Rotate(Vector3.up, -45, Space.World);
                 }
                 else if ((bounds.extents.y - bounds.extents.z) / Math.Abs(bounds.extents.z) < 0.01f)
                 {
-                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 25 x");
-                    pivotTransform.Rotate(Vector3.right, 25, Space.World);
-                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 25 z");
-                    pivotTransform.Rotate(Vector3.forward, 25, Space.World);
                     RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -45 y");
                     pivotTransform.Rotate(Vector3.up, -45, Space.World);
+                    
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 25 z");
+                    pivotTransform.Rotate(Vector3.forward, 25, Space.World);
                 }
                 else if (bounds.extents.y < bounds.extents.x / 2f || bounds.extents.x < bounds.extents.y / 2f)
                 {
                     RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 45 z");
                     pivotTransform.Rotate(Vector3.forward, 45, Space.World);
+                    
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated -25 x");
+                    pivotTransform.Rotate(Vector3.right, -25, Space.World);
                 }
+                
             }
         }
 
