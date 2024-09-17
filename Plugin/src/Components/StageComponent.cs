@@ -53,6 +53,9 @@ public class StageComponent : MonoBehaviour
         }
     }
 
+    [Range(0f, 1f)]
+    public float Padding = 0.1f;
+
     public int CullingMask => _camera.cullingMask;
 
     public Transform StagedTransform { get; private set; }
@@ -234,7 +237,7 @@ public class StageComponent : MonoBehaviour
             throw new InvalidOperationException("This object has no Bounds!");
 
         // Calculate the camera size to fit the object being displayed
-        const float paddingFactor = 2f / 1.8f;
+        var paddingFactor = 1 + Padding;
         var sizeY = bounds.extents.y * paddingFactor;
         var sizeX = bounds.extents.x * paddingFactor * _camera.aspect;
         var size = Math.Max(sizeX, sizeY);
