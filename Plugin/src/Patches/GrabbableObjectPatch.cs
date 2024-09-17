@@ -122,6 +122,10 @@ internal static class GrabbableObjectPatch
 
             var texture = RuntimeIcons.CameraStage.TakeSnapshot();
 
+            // UnPremultiply the texture
+            texture.UnPremultiply();
+            texture.Apply();
+
             texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
             

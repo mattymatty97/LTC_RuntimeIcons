@@ -322,10 +322,6 @@ public class StageComponent : MonoBehaviour
         };
         
         texture.ReadPixels(new Rect(0, 0, destTexture.width, destTexture.height), 0, 0);
-
-        // UnPremultiply the texture
-        texture.UnPremultiply();
-
         texture.Apply();
         
         // Reactivate the previously active render texture
