@@ -118,7 +118,7 @@ internal static class GrabbableObjectPatch
 
             RuntimeIcons.CameraStage.FindOptimalRotation(grabbableObject);
                 
-            RuntimeIcons.CameraStage.FindOptimalOffsetAndScale();
+            RuntimeIcons.CameraStage.PrepareCameraForShot();
 
             var texture = RuntimeIcons.CameraStage.TakeSnapshot();
 
@@ -196,7 +196,7 @@ internal static class GrabbableObjectPatch
                 }
                 else if (bounds.extents.x < bounds.extents.z * 0.5f)
                 {
-                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 90 z | 2");
+                    RuntimeIcons.Log.LogDebug($"{grabbable.itemProperties.itemName} rotated 45 z | 2");
                     pivotTransform.Rotate(Vector3.forward, 45, Space.World);
                 }
             }

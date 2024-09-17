@@ -87,7 +87,7 @@ namespace RuntimeIcons
                 CameraStage = StageComponent.CreateStage(HideFlags.HideAndDontSave, LayerMask.GetMask("Default",
                     "Player", "Water",
                     "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
-                    "MapHazards", "MiscLevelGeometry", "Terrain"), $"{nameof(RuntimeIcons)}.Stage");
+                    "MapHazards", "MiscLevelGeometry", "Terrain"), $"{nameof(RuntimeIcons)}.Stage", false);
                 DontDestroyOnLoad(CameraStage.gameObject);
                 CameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
 

@@ -74,7 +74,7 @@ public class StageComponent : MonoBehaviour
         return targetGo;
     }
 
-    public static StageComponent CreateStage(HideFlags hideFlags, int cameraLayerMask = 1, string stageName = "Stage")
+    public static StageComponent CreateStage(HideFlags hideFlags, int cameraLayerMask = 1, string stageName = "Stage", bool orthographic = true)
     {
         //create the root Object for the Stage
         var stageGo = new GameObject(stageName)
@@ -116,7 +116,7 @@ public class StageComponent : MonoBehaviour
 
         // Configure the Camera
         cam.cullingMask = cameraLayerMask;
-        cam.orthographic = false;
+        cam.orthographic = orthographic;
         cam.orthographicSize = 1;
         cam.aspect = (float)stageComponent.Resolution.x / stageComponent.Resolution.y;
         cam.clearFlags = CameraClearFlags.SolidColor;
@@ -214,7 +214,7 @@ public class StageComponent : MonoBehaviour
             $"StagedObject offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
     }
 
-    public void FindOptimalOffsetAndScale()
+    public void PrepareCameraForShot()
     {
         if (!StagedTransform)
             throw new InvalidOperationException("No Object on stage!");
@@ -239,26 +239,52 @@ public class StageComponent : MonoBehaviour
         if (bounds.size == Vector3.zero)
             throw new InvalidOperationException("This object has no Bounds!");
 
-        var distanceToCamera = _camera.nearClipPlane + bounds.extents.z;
+        var distanceToCamera = Mathf.Max(_camera.nearClipPlane + bounds.size.z, 3f);
 
         var localOffset = new Vector3(-bounds.center.x, -bounds.center.y, distanceToCamera);
 
-        var inverse = matrix.inverse;
-
-        var camera_bounds = vertexes.Select(inverse.MultiplyPoint3x4).Select(PivotTransform.localToWorldMatrix.MultiplyPoint3x4)
-            .Select(_camera.WorldToViewportPoint).GetBounds();
-
-        var cameraAngle = (camera_bounds.center - Vector3.one * 0.5f) * _camera.fieldOfView;
-
-        CameraTransform.rotation = Quaternion.Euler(0f, cameraAngle.x, cameraAngle.y);
-        
-        _camera.fieldOfView *= Mathf.Max(Mathf.Max(camera_bounds.max.x, Mathf.Abs(camera_bounds.min.x)) - camera_bounds.center.x,
-            Mathf.Max(camera_bounds.max.y, Mathf.Abs(camera_bounds.min.y)) - camera_bounds.center.y);
-
+        PivotTransform.position = CameraTransform.position + localOffset;
         
         RuntimeIcons.Log.LogInfo($"Stage offset {localOffset}");
 
-        PivotTransform.position = transform.position + localOffset;
+        if (_camera.orthographic)
+        {
+            var boundsAspect = bounds.size.x / bounds.size.y;
+            float orthoHeight;
+            if (boundsAspect > _camera.aspect)
+            {
+                var orthoWidth = bounds.size.x;
+                orthoHeight = orthoWidth / _camera.aspect;
+            }
+            else
+            {
+                orthoHeight= bounds.size.y;
+            }
+            _camera.orthographicSize = orthoHeight * 1.1f;
+        }
+        else
+        {
+
+            var inverse = matrix.inverse;
+
+            //get vertexes in local space
+
+            var localVertexes = vertexes.Select(inverse.MultiplyPoint3x4).ToArray();
+
+            //get vertexes in world space
+
+            var worldVertexes = localVertexes.Select(PivotTransform.localToWorldMatrix.MultiplyPoint3x4).ToArray();
+            
+            GetCameraAngles(_camera, _camera.transform.right, worldVertexes, out var angleMinY, out var angleMaxY);
+            GetCameraAngles(_camera, -_camera.transform.up, worldVertexes, out var angleMinX, out var angleMaxX);
+
+            var fovAngleX = Math.Max(-angleMinX, angleMaxX) * 2;
+            var fovAngleY = Camera.HorizontalToVerticalFieldOfView(Math.Max(-angleMinY, angleMaxY) * 2, _camera.aspect);
+            _camera.fieldOfView = Math.Max(fovAngleX, fovAngleY) * 1.15f;
+
+
+            RuntimeIcons.Log.LogInfo($"Camera FOV {_camera.fieldOfView}");
+        }
 
         LightTransform.position = PivotTransform.position;
     }
@@ -377,6 +403,24 @@ public class StageComponent : MonoBehaviour
             }
 
             UnityEngine.Pool.HashSetPool<Light>.Release(_lightMemory);
+        }
+    }
+    
+    private static void GetCameraAngles(Camera camera, Vector3 direction, IEnumerable<Vector3> vertices, out float angleMin, out float angleMax)
+    {
+        var position = camera.transform.position;
+        var forwardPlane = new Plane(camera.transform.forward, position);
+        var directionPlane = new Plane(direction, position);
+        angleMin = float.PositiveInfinity;
+        angleMax = float.NegativeInfinity;
+
+        foreach (var vertex in vertices)
+        {
+            var distance = forwardPlane.GetDistanceToPoint(vertex);
+            var projected = Mathf.Atan(directionPlane.GetDistanceToPoint(vertex) / distance) * Mathf.Rad2Deg;
+
+            angleMin = Math.Min(projected, angleMin);
+            angleMax = Math.Max(projected, angleMax);
         }
     }
 
