@@ -83,128 +83,127 @@ namespace RuntimeIcons
 
         private void SetStage()
         {
+            CameraStage = StageComponent.CreateStage(HideFlags.HideAndDontSave, LayerMask.GetMask("Default",
+                "Player", "Water",
+                "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
+                "MapHazards", "MiscLevelGeometry", "Terrain"), $"{nameof(RuntimeIcons)}.Stage");
+            DontDestroyOnLoad(CameraStage.gameObject);
+            CameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
 
-                CameraStage = StageComponent.CreateStage(HideFlags.HideAndDontSave, LayerMask.GetMask("Default",
-                    "Player", "Water",
-                    "Props", "Room", "InteractableObject", "Foliage", "PhysicsObject", "Enemies", "PlayerRagdoll",
-                    "MapHazards", "MiscLevelGeometry", "Terrain"), $"{nameof(RuntimeIcons)}.Stage");
-                DontDestroyOnLoad(CameraStage.gameObject);
-                CameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
-
-                //add ceiling light!
-                var lightGo1 = new GameObject("SpotLight 1")
+            //add ceiling light!
+            var lightGo1 = new GameObject("SpotLight 1")
+            {
+                hideFlags = hideFlags,
+                layer = 1,
+                transform =
                 {
-                    hideFlags = hideFlags,
-                    layer = 1,
-                    transform =
-                    {
-                        parent = CameraStage.LightTransform,
-                        localPosition = new Vector3(0, 3, 0),
-                        rotation = Quaternion.LookRotation(Vector3.down)
-                    }
-                };
+                    parent = CameraStage.LightTransform,
+                    localPosition = new Vector3(0, 3, 0),
+                    rotation = Quaternion.LookRotation(Vector3.down)
+                }
+            };
 
-                var light = lightGo1.AddComponent<Light>();
-                light.type = LightType.Spot;
-                light.shape = LightShape.Cone;
-                light.color = Color.white;
-                light.colorTemperature = 6901;
-                light.useColorTemperature = true;
-                light.shadows = LightShadows.Soft;
-                light.spotAngle = 50.0f;
-                light.innerSpotAngle = 21.8f;
-                light.range = 7.11f;
+            var light = lightGo1.AddComponent<Light>();
+            light.type = LightType.Spot;
+            light.shape = LightShape.Cone;
+            light.color = Color.white;
+            light.colorTemperature = 6901;
+            light.useColorTemperature = true;
+            light.shadows = LightShadows.Soft;
+            light.spotAngle = 50.0f;
+            light.innerSpotAngle = 21.8f;
+            light.range = 7.11f;
 
-                var lightData = lightGo1.AddComponent<HDAdditionalLightData>();
-                lightData.affectDiffuse = true;
-                lightData.affectSpecular = true;
-                lightData.affectsVolumetric = true;
-                lightData.applyRangeAttenuation = true;
-                lightData.color = Color.white;
-                lightData.colorShadow = true;
-                lightData.shadowDimmer = 0.8f;
-                lightData.customSpotLightShadowCone = 30f;
-                lightData.distance = 150000000000;
-                lightData.fadeDistance = 10000;
-                lightData.innerSpotPercent = 82.7f;
-                lightData.intensity = 75f;
+            var lightData = lightGo1.AddComponent<HDAdditionalLightData>();
+            lightData.affectDiffuse = true;
+            lightData.affectSpecular = true;
+            lightData.affectsVolumetric = true;
+            lightData.applyRangeAttenuation = true;
+            lightData.color = Color.white;
+            lightData.colorShadow = true;
+            lightData.shadowDimmer = 0.8f;
+            lightData.customSpotLightShadowCone = 30f;
+            lightData.distance = 150000000000;
+            lightData.fadeDistance = 10000;
+            lightData.innerSpotPercent = 82.7f;
+            lightData.intensity = 75f;
 
-                // add front light ( similar to ceiling one but facing a 45 angle )
-                var lightGo2 = new GameObject("SpotLight 2")
+            // add front light ( similar to ceiling one but facing a 45 angle )
+            var lightGo2 = new GameObject("SpotLight 2")
+            {
+                hideFlags = hideFlags,
+                layer = 1,
+                transform =
                 {
-                    hideFlags = hideFlags,
-                    layer = 1,
-                    transform =
-                    {
-                        parent = CameraStage.LightTransform,
-                        localPosition = new Vector3(-2.7f, 0, -2.7f),
-                        rotation = Quaternion.Euler(0, 45, 0)
-                    }
-                };
+                    parent = CameraStage.LightTransform,
+                    localPosition = new Vector3(-2.7f, 0, -2.7f),
+                    rotation = Quaternion.Euler(0, 45, 0)
+                }
+            };
 
-                var light2 = lightGo2.AddComponent<Light>();
-                light2.type = LightType.Spot;
-                light2.shape = LightShape.Cone;
-                light2.color = Color.white;
-                light2.colorTemperature = 6901;
-                light2.useColorTemperature = true;
-                light2.shadows = LightShadows.Soft;
-                light2.spotAngle = 50.0f;
-                light2.innerSpotAngle = 21.8f;
-                light2.range = 7.11f;
+            var light2 = lightGo2.AddComponent<Light>();
+            light2.type = LightType.Spot;
+            light2.shape = LightShape.Cone;
+            light2.color = Color.white;
+            light2.colorTemperature = 6901;
+            light2.useColorTemperature = true;
+            light2.shadows = LightShadows.Soft;
+            light2.spotAngle = 50.0f;
+            light2.innerSpotAngle = 21.8f;
+            light2.range = 7.11f;
 
-                var lightData2 = lightGo2.AddComponent<HDAdditionalLightData>();
-                lightData2.affectDiffuse = true;
-                lightData2.affectSpecular = true;
-                lightData2.affectsVolumetric = true;
-                lightData2.applyRangeAttenuation = true;
-                lightData2.color = Color.white;
-                lightData2.colorShadow = true;
-                lightData2.shadowDimmer = 0.6f;
-                lightData2.customSpotLightShadowCone = 30f;
-                lightData2.distance = 150000000000;
-                lightData2.fadeDistance = 10000;
-                lightData2.innerSpotPercent = 82.7f;
-                lightData2.intensity = 50f;
-                lightData2.shapeRadius = 0.5f;
+            var lightData2 = lightGo2.AddComponent<HDAdditionalLightData>();
+            lightData2.affectDiffuse = true;
+            lightData2.affectSpecular = true;
+            lightData2.affectsVolumetric = true;
+            lightData2.applyRangeAttenuation = true;
+            lightData2.color = Color.white;
+            lightData2.colorShadow = true;
+            lightData2.shadowDimmer = 0.6f;
+            lightData2.customSpotLightShadowCone = 30f;
+            lightData2.distance = 150000000000;
+            lightData2.fadeDistance = 10000;
+            lightData2.innerSpotPercent = 82.7f;
+            lightData2.intensity = 50f;
+            lightData2.shapeRadius = 0.5f;
 
-                // add a second front light ( similar to the other one but does not have Specular )
-                var lightGo3 = new GameObject("SpotLight 3")
+            // add a second front light ( similar to the other one but does not have Specular )
+            var lightGo3 = new GameObject("SpotLight 3")
+            {
+                hideFlags = hideFlags,
+                layer = 1,
+                transform =
                 {
-                    hideFlags = hideFlags,
-                    layer = 1,
-                    transform =
-                    {
-                        parent = CameraStage.LightTransform,
-                        localPosition = new Vector3(2.7f, 0, -2.7f),
-                        rotation = Quaternion.Euler(0, -45, 0)
-                    }
-                };
+                    parent = CameraStage.LightTransform,
+                    localPosition = new Vector3(2.7f, 0, -2.7f),
+                    rotation = Quaternion.Euler(0, -45, 0)
+                }
+            };
 
-                var light3 = lightGo3.AddComponent<Light>();
-                light3.type = LightType.Spot;
-                light3.shape = LightShape.Cone;
-                light3.color = Color.white;
-                light3.colorTemperature = 6901;
-                light3.useColorTemperature = true;
-                light3.shadows = LightShadows.Soft;
-                light3.spotAngle = 50.0f;
-                light3.innerSpotAngle = 21.8f;
-                light3.range = 7.11f;
+            var light3 = lightGo3.AddComponent<Light>();
+            light3.type = LightType.Spot;
+            light3.shape = LightShape.Cone;
+            light3.color = Color.white;
+            light3.colorTemperature = 6901;
+            light3.useColorTemperature = true;
+            light3.shadows = LightShadows.Soft;
+            light3.spotAngle = 50.0f;
+            light3.innerSpotAngle = 21.8f;
+            light3.range = 7.11f;
 
-                var lightData3 = lightGo3.AddComponent<HDAdditionalLightData>();
-                lightData3.affectDiffuse = true;
-                lightData3.affectSpecular = false;
-                lightData3.affectsVolumetric = true;
-                lightData3.applyRangeAttenuation = true;
-                lightData3.color = Color.white;
-                lightData3.colorShadow = true;
-                lightData3.shadowDimmer = 0.4f;
-                lightData3.customSpotLightShadowCone = 30f;
-                lightData3.distance = 150000000000;
-                lightData3.fadeDistance = 10000;
-                lightData3.innerSpotPercent = 82.7f;
-                lightData3.intensity = 30f;
+            var lightData3 = lightGo3.AddComponent<HDAdditionalLightData>();
+            lightData3.affectDiffuse = true;
+            lightData3.affectSpecular = false;
+            lightData3.affectsVolumetric = true;
+            lightData3.applyRangeAttenuation = true;
+            lightData3.color = Color.white;
+            lightData3.colorShadow = true;
+            lightData3.shadowDimmer = 0.4f;
+            lightData3.customSpotLightShadowCone = 30f;
+            lightData3.distance = 150000000000;
+            lightData3.fadeDistance = 10000;
+            lightData3.innerSpotPercent = 82.7f;
+            lightData3.intensity = 30f;
         }
     }
 }
