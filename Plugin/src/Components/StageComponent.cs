@@ -212,7 +212,7 @@ public class StageComponent : MonoBehaviour
         
     }
     
-    public void FindOptimalOffsetAndScale()
+    public void PrepareCameraForShot()
     {
         if (!StagedTransform)
             throw new InvalidOperationException("No Object on stage!");
@@ -232,36 +232,16 @@ public class StageComponent : MonoBehaviour
         
         if (bounds.size == Vector3.zero)
             throw new InvalidOperationException("This object has no Bounds!");
-        
-        // Calculate the visible world area based on the camera's orthographic size and aspect ratio
-        var cameraHeight = 2f * _camera.orthographicSize; // Total height in world units (orthographicSize is half the height)
-        var cameraWidth = cameraHeight * _camera.aspect;
-        var targetWorldArea = new Vector2(cameraWidth, cameraHeight);
 
-        // Calculate the scale factor considering the object's distance from the camera
-        // also add some padding from the sides
-        var scaleFactorX = (targetWorldArea.x - 0.2f) / bounds.size.x;
-        var scaleFactorY = (targetWorldArea.y - 0.2f) / bounds.size.y;
-        var scaleFactor = Mathf.Min(scaleFactorX, scaleFactorY);
-        
-        // Apply the calculated scale factor
-        var scale = Vector3.one * scaleFactor;
-        
-        // Calculate the new bounds size after applying scale
-        var scaledSize = Vector3.Scale(bounds.size, scale);
-        var scaledCenter = Vector3.Scale(bounds.center, scale);
+        // Calculate the camera size to fit the object being displayed
+        const float paddingFactor = 2f / 1.8f;
+        var sizeY = bounds.extents.y * paddingFactor;
+        var sizeX = bounds.extents.x * paddingFactor * _camera.aspect;
+        var size = Math.Max(sizeX, sizeY);
+        _camera.orthographicSize = size;
 
-        // Calculate the desired Z position to prevent clipping
-        var distanceToMove = Mathf.Max(scaledSize.z + _camera.nearClipPlane, 1f);
-
-        // Calculate the offset in the camera's local space
-        var localOffset = new Vector3(-scaledCenter.x, -scaledCenter.y, distanceToMove);
-        
-        RuntimeIcons.Log.LogInfo($"Stage offset {localOffset} scale {scale}");
-
-        PivotTransform.position = transform.position + localOffset;
-        PivotTransform.localScale = scale;
-        
+        // Adjust the pivot so that the object doesn't clip into the near plane
+        PivotTransform.position = transform.position - bounds.center + Vector3.forward * (_camera.nearClipPlane + bounds.extents.z);
         LightTransform.position = PivotTransform.position;
     }
 

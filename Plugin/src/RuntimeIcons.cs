@@ -122,6 +122,7 @@ namespace RuntimeIcons
             lightData.color = Color.white;
             lightData.colorShadow = true;
             lightData.shadowDimmer = 0.8f;
+            lightData.shadowResolution.@override = 1024;
             lightData.customSpotLightShadowCone = 30f;
             lightData.distance = 150000000000;
             lightData.fadeDistance = 10000;
@@ -160,6 +161,7 @@ namespace RuntimeIcons
             lightData2.color = Color.white;
             lightData2.colorShadow = true;
             lightData2.shadowDimmer = 0.6f;
+            lightData2.shadowResolution.@override = 1024;
             lightData2.customSpotLightShadowCone = 30f;
             lightData2.distance = 150000000000;
             lightData2.fadeDistance = 10000;
@@ -199,6 +201,7 @@ namespace RuntimeIcons
             lightData3.color = Color.white;
             lightData3.colorShadow = true;
             lightData3.shadowDimmer = 0.4f;
+            lightData3.shadowResolution.@override = 1024;
             lightData3.customSpotLightShadowCone = 30f;
             lightData3.distance = 150000000000;
             lightData3.fadeDistance = 10000;
