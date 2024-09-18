@@ -16,14 +16,14 @@ namespace RuntimeIcons;
 internal static class PluginConfig
 {
     internal static ISet<string> Blacklist { get; private set; }
-            
+
     internal static IDictionary<string, Vector3> RotationOverrides { get; private set; }
     internal static IDictionary<string, string> FileOverrides { get; private set; }
-            
+
     private static ConfigEntry<string> _rotationOverridesConfig; 
     private static ConfigEntry<string> _blacklistConfig;
     private static ConfigEntry<string> _fileOverridesConfig;
-            
+
     internal static void Init()
     {
         var config = RuntimeIcons.INSTANCE.Config;
@@ -34,7 +34,7 @@ internal static class PluginConfig
         _blacklistConfig = config.Bind("Config", "BlacklistConfig", "Body,",
             "List of items to not replace icons");
 
-        _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90",
+        _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90|Cash register:0,-90,15",
             "Dictionary of alternate rotations for items\nListSeparator=|");
         
         ParseBlacklist();

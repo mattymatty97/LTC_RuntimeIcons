@@ -118,9 +118,13 @@ internal static class GrabbableObjectPatch
 
             RuntimeIcons.CameraStage.FindOptimalRotation(grabbableObject);
                 
-            RuntimeIcons.CameraStage.FindOptimalOffsetAndScale();
+            RuntimeIcons.CameraStage.PrepareCameraForShot();
 
             var texture = RuntimeIcons.CameraStage.TakeSnapshot();
+
+            // UnPremultiply the texture
+            texture.UnPremultiply();
+            texture.Apply();
 
             texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                 Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));

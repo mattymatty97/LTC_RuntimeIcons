@@ -39,7 +39,7 @@ public class StageComponent : MonoBehaviour
     
     private Camera _camera;
     private HDAdditionalCameraData _cameraSettings;
-    private CustomPassThing _cameraPass;
+    private TransparentRenderTexturePass _cameraPass;
     private GameObject _targetGo;
     private Vector2Int _resolution = new Vector2Int(128, 128);
 
@@ -52,6 +52,9 @@ public class StageComponent : MonoBehaviour
             _camera.aspect = (float)_resolution.x / _resolution.y;
         }
     }
+
+    [Range(0f, 1f)]
+    public float Padding = 0.1f;
 
     public int CullingMask => _camera.cullingMask;
 
@@ -73,9 +76,8 @@ public class StageComponent : MonoBehaviour
         return targetGo;
     }
 
-    public static StageComponent CreateStage(HideFlags hideFlags, int cameraLayerMask = 1,string stageName = "Stage")
+    public static StageComponent CreateStage(HideFlags hideFlags, int cameraLayerMask = 1, string stageName = "Stage", bool orthographic = false)
     {
-        
         //create the root Object for the Stage
         var stageGo = new GameObject(stageName)
         {
@@ -116,8 +118,7 @@ public class StageComponent : MonoBehaviour
 
         // Configure the Camera
         cam.cullingMask = cameraLayerMask;
-        cam.orthographic = true;
-        cam.orthographicSize = 1;
+        cam.orthographic = orthographic;
         cam.aspect = (float)stageComponent.Resolution.x / stageComponent.Resolution.y;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = Color.clear;
@@ -140,7 +141,7 @@ public class StageComponent : MonoBehaviour
         var customPassVolume = cameraGo.AddComponent<CustomPassVolume>();
         customPassVolume.targetCamera = cam;
         
-        var customPass = (CustomPassThing)customPassVolume.AddPassOfType<CustomPassThing>();
+        var customPass = (TransparentRenderTexturePass)customPassVolume.AddPassOfType<TransparentRenderTexturePass>();
         stageComponent._cameraPass = customPass;
         
         customPass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
@@ -173,7 +174,7 @@ public class StageComponent : MonoBehaviour
         RuntimeIcons.Log.LogInfo($"Setting stage for {targetTransform.name}");
         
         PivotTransform.parent = null;
-        PivotTransform.position = targetTransform.position;
+        PivotTransform.position = Vector3.zero;
         PivotTransform.rotation = Quaternion.identity;
         SceneManager.MoveGameObjectToScene(PivotGo, targetTransform.gameObject.scene);
         
@@ -209,59 +210,55 @@ public class StageComponent : MonoBehaviour
         StagedTransform.localPosition = -bounds.center;
         
         RuntimeIcons.Log.LogInfo($"StagedObject offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
-        
     }
-    
-    public void FindOptimalOffsetAndScale()
+
+    public void PrepareCameraForShot()
     {
         if (!StagedTransform)
             throw new InvalidOperationException("No Object on stage!");
-        
-        var matrix = Matrix4x4.TRS(Vector3.zero, PivotTransform.rotation, Vector3.one);
-        
+
+        PivotTransform.position = Vector3.zero;
         var executionOptions = new ExecutionOptions()
         {
             VertexCache = VertexCache,
             CullingMask = CullingMask,
             LogHandler = RuntimeIcons.VerboseMeshLog,
-            OverrideMatrix = matrix
+            OverrideMatrix = PivotTransform.localToWorldMatrix,
         };
-        
-        if (!PivotGo.TryGetBounds(out var bounds, executionOptions))
+        var worldToLocal = PivotTransform.worldToLocalMatrix;
+
+        var vertices = PivotGo.GetVertexes(executionOptions);
+        if (vertices.Length == 0)
             throw new InvalidOperationException("This object has no Renders!");
-        
+
+        var bounds = vertices.GetBounds();
         if (bounds.size == Vector3.zero)
             throw new InvalidOperationException("This object has no Bounds!");
-        
-        // Calculate the visible world area based on the camera's orthographic size and aspect ratio
-        var cameraHeight = 2f * _camera.orthographicSize; // Total height in world units (orthographicSize is half the height)
-        var cameraWidth = cameraHeight * _camera.aspect;
-        var targetWorldArea = new Vector2(cameraWidth, cameraHeight);
 
-        // Calculate the scale factor considering the object's distance from the camera
-        // also add some padding from the sides
-        var scaleFactorX = (targetWorldArea.x - 0.2f) / bounds.size.x;
-        var scaleFactorY = (targetWorldArea.y - 0.2f) / bounds.size.y;
-        var scaleFactor = Mathf.Min(scaleFactorX, scaleFactorY);
-        
-        // Apply the calculated scale factor
-        var scale = Vector3.one * scaleFactor;
-        
-        // Calculate the new bounds size after applying scale
-        var scaledSize = Vector3.Scale(bounds.size, scale);
-        var scaledCenter = Vector3.Scale(bounds.center, scale);
+        // Adjust the pivot so that the object doesn't clip into the near plane
+        var distanceToCamera = Math.Max(_camera.nearClipPlane + bounds.size.z, 3f);
+        PivotTransform.position = _camera.transform.position - bounds.center + _camera.transform.forward * distanceToCamera;
 
-        // Calculate the desired Z position to prevent clipping
-        var distanceToMove = Mathf.Max(scaledSize.z + _camera.nearClipPlane, 1f);
+        // Calculate the camera size to fit the object being displayed
+        var paddingFactor = 1 + Padding;
 
-        // Calculate the offset in the camera's local space
-        var localOffset = new Vector3(-scaledCenter.x, -scaledCenter.y, distanceToMove);
-        
-        RuntimeIcons.Log.LogInfo($"Stage offset {localOffset} scale {scale}");
+        if (_camera.orthographic)
+        {
+            var sizeY = bounds.extents.y * paddingFactor;
+            var sizeX = bounds.extents.x * paddingFactor * _camera.aspect;
+            var size = Math.Max(sizeX, sizeY);
+            _camera.orthographicSize = size;
+        }
+        else
+        {
+            var matrix = PivotTransform.localToWorldMatrix * worldToLocal;
+            for (var i = 0; i < vertices.Length; i++)
+                vertices[i] = matrix.MultiplyPoint3x4(vertices[i]);
 
-        PivotTransform.position = transform.position + localOffset;
-        PivotTransform.localScale = scale;
-        
+            FitIsometricCameraToVertices(_camera, vertices);
+            _camera.fieldOfView *= paddingFactor;
+        }
+
         LightTransform.position = PivotTransform.position;
     }
 
@@ -283,6 +280,7 @@ public class StageComponent : MonoBehaviour
         PivotTransform.rotation = Quaternion.identity;
         LightTransform.localPosition = Vector3.zero;
         LightTransform.rotation = Quaternion.identity;
+        CameraTransform.localRotation = Quaternion.identity;
     }
 
     public Texture2D TakeSnapshot()
@@ -324,10 +322,6 @@ public class StageComponent : MonoBehaviour
         };
         
         texture.ReadPixels(new Rect(0, 0, destTexture.width, destTexture.height), 0, 0);
-
-        // UnPremultiply the texture
-        texture.UnPremultiply();
-
         texture.Apply();
         
         // Reactivate the previously active render texture
@@ -394,6 +388,49 @@ public class StageComponent : MonoBehaviour
             this.LocalRotation = target.localRotation;
             this.LocalScale = target.localScale;
         }
+    }
+
+    private static void GetCameraAngles(Camera camera, Vector3 direction, IEnumerable<Vector3> vertices, out float angleMin, out float angleMax)
+    {
+        var position = camera.transform.position;
+        var forwardPlane = new Plane(camera.transform.forward, position);
+        var directionPlane = new Plane(direction, position);
+        var tangentMin = float.PositiveInfinity;
+        var tangentMax = float.NegativeInfinity;
+
+        foreach (var vertex in vertices)
+        {
+            var tangent = directionPlane.GetDistanceToPoint(vertex) / forwardPlane.GetDistanceToPoint(vertex);
+            tangentMin = Math.Min(tangent, tangentMin);
+            tangentMax = Math.Max(tangent, tangentMax);
+        }
+
+        angleMin = Mathf.Atan(tangentMin) * Mathf.Rad2Deg;
+        angleMax = Mathf.Atan(tangentMax) * Mathf.Rad2Deg;
+    }
+
+    private void FitIsometricCameraToVertices(Camera camera, IEnumerable<Vector3> vertices)
+    {
+        const int iterations = 2;
+
+        float angleMinX, angleMaxX;
+        float angleMinY, angleMaxY;
+
+        for (var i = 0; i < iterations; i++)
+        {
+            GetCameraAngles(camera, camera.transform.right, vertices, out angleMinY, out angleMaxY);
+            camera.transform.Rotate(Vector3.up, (angleMinY + angleMaxY) / 2, Space.World);
+
+            GetCameraAngles(camera, -camera.transform.up, vertices, out angleMinX, out angleMaxX);
+            camera.transform.Rotate(Vector3.right, (angleMinX + angleMaxX) / 2, Space.Self);
+        }
+
+        GetCameraAngles(camera, camera.transform.right, vertices, out angleMinY, out angleMaxY);
+        GetCameraAngles(camera, -camera.transform.up, vertices, out angleMinX, out angleMaxX);
+
+        var fovAngleX = Math.Max(-angleMinX, angleMaxX) * 2;
+        var fovAngleY = Camera.HorizontalToVerticalFieldOfView(Math.Max(-angleMinY, angleMaxY) * 2, camera.aspect);
+        camera.fieldOfView = Math.Max(fovAngleX, fovAngleY);
     }
 
 }

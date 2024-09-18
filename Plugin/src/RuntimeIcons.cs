@@ -13,7 +13,7 @@ using LogType = VertexLibrary.LogType;
 namespace RuntimeIcons
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("VertexLibrary", "0.0.1")]
+    [BepInDependency("com.github.lethalcompanymodding.vertexlibrary", "0.0.1")]
     [BepInDependency("BMX.LobbyCompatibility", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ainavt.lc.lethalconfig", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     internal class RuntimeIcons : BaseUnityPlugin
@@ -89,6 +89,7 @@ namespace RuntimeIcons
                 "MapHazards", "MiscLevelGeometry", "Terrain"), $"{nameof(RuntimeIcons)}.Stage");
             DontDestroyOnLoad(CameraStage.gameObject);
             CameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
+            CameraStage.Resolution = new Vector2Int(256, 256);
 
             //add ceiling light!
             var lightGo1 = new GameObject("SpotLight 1")
@@ -122,6 +123,7 @@ namespace RuntimeIcons
             lightData.color = Color.white;
             lightData.colorShadow = true;
             lightData.shadowDimmer = 0.8f;
+            lightData.shadowResolution.@override = 1024;
             lightData.customSpotLightShadowCone = 30f;
             lightData.distance = 150000000000;
             lightData.fadeDistance = 10000;
@@ -160,6 +162,7 @@ namespace RuntimeIcons
             lightData2.color = Color.white;
             lightData2.colorShadow = true;
             lightData2.shadowDimmer = 0.6f;
+            lightData2.shadowResolution.@override = 1024;
             lightData2.customSpotLightShadowCone = 30f;
             lightData2.distance = 150000000000;
             lightData2.fadeDistance = 10000;
@@ -199,6 +202,7 @@ namespace RuntimeIcons
             lightData3.color = Color.white;
             lightData3.colorShadow = true;
             lightData3.shadowDimmer = 0.4f;
+            lightData3.shadowResolution.@override = 1024;
             lightData3.customSpotLightShadowCone = 30f;
             lightData3.distance = 150000000000;
             lightData3.fadeDistance = 10000;
