@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RuntimeIcons.Utils;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -232,20 +231,20 @@ public class StageComponent : MonoBehaviour
             throw new InvalidOperationException("This object has no Renders!");
 
         var bounds = vertices.GetBounds();
-        if (bounds.size == Vector3.zero)
+        if (!bounds.HasValue)
             throw new InvalidOperationException("This object has no Bounds!");
 
         // Adjust the pivot so that the object doesn't clip into the near plane
-        var distanceToCamera = Math.Max(_camera.nearClipPlane + bounds.size.z, 3f);
-        PivotTransform.position = _camera.transform.position - bounds.center + _camera.transform.forward * distanceToCamera;
+        var distanceToCamera = Math.Max(_camera.nearClipPlane + bounds.Value.size.z, 3f);
+        PivotTransform.position = _camera.transform.position - bounds.Value.center + _camera.transform.forward * distanceToCamera;
 
         // Calculate the camera size to fit the object being displayed
         var paddingFactor = 1 + Padding;
 
         if (_camera.orthographic)
         {
-            var sizeY = bounds.extents.y * paddingFactor;
-            var sizeX = bounds.extents.x * paddingFactor * _camera.aspect;
+            var sizeY = bounds.Value.extents.y * paddingFactor;
+            var sizeX = bounds.Value.extents.x * paddingFactor * _camera.aspect;
             var size = Math.Max(sizeX, sizeY);
             _camera.orthographicSize = size;
         }

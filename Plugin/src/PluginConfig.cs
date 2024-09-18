@@ -10,6 +10,7 @@ using HarmonyLib;
 using RuntimeIcons.Dependency;
 using RuntimeIcons.Patches;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RuntimeIcons;
 
@@ -34,7 +35,7 @@ internal static class PluginConfig
         _blacklistConfig = config.Bind("Config", "BlacklistConfig", "Body,",
             "List of items to not replace icons");
 
-        _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90|Cash register:0,-90,15",
+        _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Rubber Ducky:25,-135,0|Airhorn:-45,90,-80|Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90",
             "Dictionary of alternate rotations for items\nListSeparator=|");
         
         ParseBlacklist();
@@ -80,7 +81,7 @@ internal static class PluginConfig
                         var originalIcon = item.itemIcon;
                         item.itemIcon = null;
 
-                        var spawnedItem = UnityEngine.Object.Instantiate(item.spawnPrefab);
+                        var spawnedItem = Object.Instantiate(item.spawnPrefab);
 
                         try
                         {
@@ -95,7 +96,7 @@ internal static class PluginConfig
                         catch { }
                         finally
                         {
-                            UnityEngine.Object.Destroy(spawnedItem);
+                            Object.Destroy(spawnedItem);
                         }
 
                         if (item.itemIcon != null && item.itemIcon != GrabbableObjectPatch.BrokenSprite)
@@ -204,7 +205,7 @@ internal static class RotationEditor
     {
         if (LethalConfigProxy.Enabled)
         {
-            var configFile = new ConfigFile(Path.GetTempFileName(), false, BepInEx.MetadataHelper.GetMetadata(RuntimeIcons.INSTANCE));
+            var configFile = new ConfigFile(Path.GetTempFileName(), false, MetadataHelper.GetMetadata(RuntimeIcons.INSTANCE));
 
             var eulerAngles = configFile.Bind("Rotation Editor", "Euler Angles", "0,0,0", "The Euler angles representing this rotation");
                 
