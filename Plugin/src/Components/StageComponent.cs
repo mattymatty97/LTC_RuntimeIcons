@@ -52,8 +52,8 @@ public class StageComponent : MonoBehaviour
         }
     }
 
-    [Range(0f, 1f)]
-    public float Padding = 0.1f;
+    public MarginType MarginType = MarginType.Fraction;
+    public Vector2 Margin = new Vector2(0.1f, 0.1f);
 
     public int CullingMask => _camera.cullingMask;
 
@@ -239,12 +239,18 @@ public class StageComponent : MonoBehaviour
         PivotTransform.position = _camera.transform.position - bounds.Value.center + _camera.transform.forward * distanceToCamera;
 
         // Calculate the camera size to fit the object being displayed
-        var paddingFactor = 1 + Padding;
+        Vector2 marginFraction = MarginType switch
+        {
+            MarginType.Fraction => Margin,
+            MarginType.Pixels => Margin / _resolution,
+            _ => Vector2.zero,
+        };
+        Vector2 fovScale = Vector2.one / (Vector2.one - marginFraction);
 
         if (_camera.orthographic)
         {
-            var sizeY = bounds.Value.extents.y * paddingFactor;
-            var sizeX = bounds.Value.extents.x * paddingFactor * _camera.aspect;
+            var sizeY = bounds.Value.extents.y * fovScale.y;
+            var sizeX = bounds.Value.extents.x * fovScale.x * _camera.aspect;
             var size = Math.Max(sizeX, sizeY);
             _camera.orthographicSize = size;
         }
@@ -254,8 +260,26 @@ public class StageComponent : MonoBehaviour
             for (var i = 0; i < vertices.Length; i++)
                 vertices[i] = matrix.MultiplyPoint3x4(vertices[i]);
 
-            FitIsometricCameraToVertices(_camera, vertices);
-            _camera.fieldOfView *= paddingFactor;
+            const int iterations = 2;
+
+            float angleMinX, angleMaxX;
+            float angleMinY, angleMaxY;
+
+            for (var i = 0; i < iterations; i++)
+            {
+                GetCameraAngles(_camera, CameraTransform.right, vertices, out angleMinY, out angleMaxY);
+                _camera.transform.Rotate(Vector3.up, (angleMinY + angleMaxY) / 2, Space.World);
+
+                GetCameraAngles(_camera, -CameraTransform.up, vertices, out angleMinX, out angleMaxX);
+                _camera.transform.Rotate(Vector3.right, (angleMinX + angleMaxX) / 2, Space.Self);
+            }
+
+            GetCameraAngles(_camera, CameraTransform.right, vertices, out angleMinY, out angleMaxY);
+            GetCameraAngles(_camera, -CameraTransform.up, vertices, out angleMinX, out angleMaxX);
+
+            var fovAngleX = Math.Max(-angleMinX, angleMaxX) * 2 * fovScale.y;
+            var fovAngleY = Camera.HorizontalToVerticalFieldOfView(Math.Max(-angleMinY, angleMaxY) * 2, _camera.aspect) * fovScale.x;
+            _camera.fieldOfView = Math.Max(fovAngleX, fovAngleY);
         }
 
         LightTransform.position = PivotTransform.position;
@@ -408,28 +432,10 @@ public class StageComponent : MonoBehaviour
         angleMax = Mathf.Atan(tangentMax) * Mathf.Rad2Deg;
     }
 
-    private void FitIsometricCameraToVertices(Camera camera, IEnumerable<Vector3> vertices)
-    {
-        const int iterations = 2;
+}
 
-        float angleMinX, angleMaxX;
-        float angleMinY, angleMaxY;
-
-        for (var i = 0; i < iterations; i++)
-        {
-            GetCameraAngles(camera, camera.transform.right, vertices, out angleMinY, out angleMaxY);
-            camera.transform.Rotate(Vector3.up, (angleMinY + angleMaxY) / 2, Space.World);
-
-            GetCameraAngles(camera, -camera.transform.up, vertices, out angleMinX, out angleMaxX);
-            camera.transform.Rotate(Vector3.right, (angleMinX + angleMaxX) / 2, Space.Self);
-        }
-
-        GetCameraAngles(camera, camera.transform.right, vertices, out angleMinY, out angleMaxY);
-        GetCameraAngles(camera, -camera.transform.up, vertices, out angleMinX, out angleMaxX);
-
-        var fovAngleX = Math.Max(-angleMinX, angleMaxX) * 2;
-        var fovAngleY = Camera.HorizontalToVerticalFieldOfView(Math.Max(-angleMinY, angleMaxY) * 2, camera.aspect);
-        camera.fieldOfView = Math.Max(fovAngleX, fovAngleY);
-    }
-
+public enum MarginType
+{
+    Fraction,
+    Pixels,
 }
