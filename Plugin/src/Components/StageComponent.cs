@@ -52,8 +52,7 @@ public class StageComponent : MonoBehaviour
         }
     }
 
-    public MarginType MarginType = MarginType.Fraction;
-    public Vector2 Margin = new Vector2(0.1f, 0.1f);
+    public Vector2 MarginPixels = new Vector2(0, 0);
 
     public int CullingMask => _camera.cullingMask;
 
@@ -239,12 +238,7 @@ public class StageComponent : MonoBehaviour
         PivotTransform.position = _camera.transform.position - bounds.Value.center + _camera.transform.forward * distanceToCamera;
 
         // Calculate the camera size to fit the object being displayed
-        Vector2 marginFraction = MarginType switch
-        {
-            MarginType.Fraction => Margin,
-            MarginType.Pixels => Margin / _resolution,
-            _ => Vector2.zero,
-        };
+        Vector2 marginFraction = MarginPixels / _resolution;
         Vector2 fovScale = Vector2.one / (Vector2.one - marginFraction);
 
         if (_camera.orthographic)

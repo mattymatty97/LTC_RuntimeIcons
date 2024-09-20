@@ -90,6 +90,7 @@ namespace RuntimeIcons
             DontDestroyOnLoad(CameraStage.gameObject);
             CameraStage.gameObject.transform.position = new Vector3(0, 1000, 1000);
             CameraStage.Resolution = new Vector2Int(256, 256);
+            CameraStage.MarginPixels = new Vector2(32, 32);
 
             //add ceiling light!
             var lightGo1 = new GameObject("SpotLight 1")
