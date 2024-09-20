@@ -9,6 +9,8 @@ public class TransparentRenderTexturePass : CustomPass
 {
     public RenderTexture targetTexture;
 
+    private bool printedError = false;
+
     private static ShaderTagId[] depthPrepassTags;
     private static ShaderTagId[] forwardTags;
 
@@ -54,6 +56,13 @@ public class TransparentRenderTexturePass : CustomPass
 
     protected override void Execute(CustomPassContext ctx)
     {
+        if (targetTexture == null && !printedError)
+        {
+            RuntimeIcons.Log.LogError($"{this} is missing a target texture to render to.");
+            printedError = true;
+            return;
+        }
+
         ctx.cmd.SetRenderTarget(targetTexture.colorBuffer, targetTexture.depthBuffer);
         ctx.cmd.ClearRenderTarget(true, true, Color.clear);
 
