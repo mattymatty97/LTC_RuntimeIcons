@@ -56,12 +56,17 @@ public class TransparentRenderTexturePass : CustomPass
 
     protected override void Execute(CustomPassContext ctx)
     {
-        if (targetTexture == null && !printedError)
+        if (targetTexture == null)
         {
+            if (printedError) 
+                return;
+            
             RuntimeIcons.Log.LogError($"{this} is missing a target texture to render to.");
             printedError = true;
             return;
         }
+
+        printedError = false;
 
         ctx.cmd.SetRenderTarget(targetTexture.colorBuffer, targetTexture.depthBuffer);
         ctx.cmd.ClearRenderTarget(true, true, Color.clear);
