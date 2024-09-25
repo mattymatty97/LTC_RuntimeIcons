@@ -13,10 +13,10 @@ using Object = UnityEngine.Object;
 namespace RuntimeIcons.Patches;
 
 [HarmonyPatch]
-internal static class GrabbableObjectPatch
+public static class GrabbableObjectPatch
 {
 
-    internal static Sprite BrokenSprite { get; set; }
+    public static Sprite BrokenSprite { get; private set; }
 
     internal static bool ItemHasIcon(Item item)
     {
@@ -116,7 +116,7 @@ internal static class GrabbableObjectPatch
             
             RuntimeIcons.CameraStage.CenterObjectOnPivot(rotation);
 
-            RuntimeIcons.CameraStage.FindOptimalRotation(grabbableObject);
+            FindOptimalRotation(RuntimeIcons.CameraStage, grabbableObject);
                 
             RuntimeIcons.CameraStage.PrepareCameraForShot();
 
@@ -154,10 +154,11 @@ internal static class GrabbableObjectPatch
             RuntimeIcons.CameraStage.ResetStage();
         }
     }
-    
-    public static void FindOptimalRotation(this StageComponent stage, GrabbableObject grabbable)
+
+    public static void FindOptimalRotation(StageComponent stage, GrabbableObject grabbable)
     {
         var pivotTransform = stage.PivotTransform;
+        pivotTransform.rotation = Quaternion.identity;
         
         if (PluginConfig.RotationOverrides.TryGetValue(grabbable.itemProperties.itemName,
                 out var rotations))
@@ -247,7 +248,7 @@ internal static class GrabbableObjectPatch
             }
         }
 
-        RuntimeIcons.Log.LogInfo($"Stage rotation {pivotTransform.localRotation.eulerAngles}");
+        RuntimeIcons.Log.LogInfo($"Stage rotation {pivotTransform.rotation.eulerAngles}");
     }
 
     private static void UpdateIconsInHUD(Item item)
