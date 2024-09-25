@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using LethalConfig;
 using LethalConfig.ConfigItems;
@@ -16,7 +17,7 @@ namespace RuntimeIcons.Dependency
         {
             get
             {
-                _enabled ??= BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("ainavt.lc.lethalconfig");
+                _enabled ??= Chainloader.PluginInfos.ContainsKey("ainavt.lc.lethalconfig");
                 return _enabled.Value;
             }
         }
@@ -58,6 +59,16 @@ namespace RuntimeIcons.Dependency
             {
                 RequiresRestart = requiresRestart,
                 Name = GetPrettyConfigName(entry)
+            }));
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        public static void AddConfig<T>(ConfigEntry<T> entry, bool requiresRestart = false) where T : Enum
+        {
+            LethalConfigManager.AddConfigItem(new EnumDropDownConfigItem<T>(entry, new EnumDropDownOptions()
+            {
+                RequiresRestart = requiresRestart,
+                CanModifyCallback = () => (false, "THIS IS A FLAG TYPE ENUM, EDITING CURRENTLY NOT SUPPORTED!")
             }));
         }
         

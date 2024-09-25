@@ -17,7 +17,7 @@
 	
     <ItemGroup>
         <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.0.1"/>
-
+        
         <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
         <!--<Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
         <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.dll"/>

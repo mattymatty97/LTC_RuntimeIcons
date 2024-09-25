@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using HarmonyLib;
 using RuntimeIcons.Dependency;
 using RuntimeIcons.Patches;
@@ -16,6 +17,8 @@ namespace RuntimeIcons;
 
 internal static class PluginConfig
 {
+
+    internal static LogLevel VerboseMeshLogs => _verboseMeshLogs.Value;
     internal static ISet<string> Blacklist { get; private set; }
 
     internal static IDictionary<string, Vector3> RotationOverrides { get; private set; }
@@ -24,11 +27,15 @@ internal static class PluginConfig
     private static ConfigEntry<string> _rotationOverridesConfig; 
     private static ConfigEntry<string> _blacklistConfig;
     private static ConfigEntry<string> _fileOverridesConfig;
+    private static ConfigEntry<LogLevel> _verboseMeshLogs;
 
     internal static void Init()
     {
         var config = RuntimeIcons.INSTANCE.Config;
         //Initialize Configs
+
+        _verboseMeshLogs = config.Bind("Debug", "Verbose Mesh Logs", LogLevel.None,"Print Extra logs!");
+        
         _fileOverridesConfig = config.Bind("Overrides", "Manual Files", "",
             "Dictionary of files to use for specific items");
                 
@@ -49,6 +56,8 @@ internal static class PluginConfig
 
         if (LethalConfigProxy.Enabled)
         {
+            LethalConfigProxy.AddConfig(_verboseMeshLogs);
+            
             LethalConfigProxy.AddConfig(_blacklistConfig);
             LethalConfigProxy.AddConfig(_fileOverridesConfig);
             LethalConfigProxy.AddConfig(_rotationOverridesConfig);

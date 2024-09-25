@@ -43,8 +43,9 @@ namespace RuntimeIcons
                 LogType.All => LogLevel.All,
                 _ => LogLevel.None,
             };
-                
-            VerboseMeshLog(level, message);
+            
+            if ((level & PluginConfig.VerboseMeshLogs) != 0)
+                VerboseMeshLog(level, message);
         }
 
         internal static void VerboseMeshLog(LogLevel logLevel, Func<string> message)
