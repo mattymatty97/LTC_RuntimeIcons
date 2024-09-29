@@ -19,13 +19,15 @@ internal static class PluginConfig
 {
 
     internal static LogLevel VerboseMeshLogs => _verboseMeshLogs.Value;
-    internal static ISet<string> Blacklist { get; private set; }
+    internal static ISet<string> ItemList { get; private set; }
+    internal static ListBehaviour ItemListBehaviour => _itemListBehaviourConfig.Value;
 
     internal static IDictionary<string, Vector3> RotationOverrides { get; private set; }
     internal static IDictionary<string, string> FileOverrides { get; private set; }
 
     private static ConfigEntry<string> _rotationOverridesConfig; 
-    private static ConfigEntry<string> _blacklistConfig;
+    private static ConfigEntry<ListBehaviour> _itemListBehaviourConfig;
+    private static ConfigEntry<string> _itemListConfig;
     private static ConfigEntry<string> _fileOverridesConfig;
     private static ConfigEntry<LogLevel> _verboseMeshLogs;
 
@@ -38,15 +40,16 @@ internal static class PluginConfig
         
         _fileOverridesConfig = config.Bind("Overrides", "Manual Files", "",
             "Dictionary of files to use for specific items");
+        
+        _itemListBehaviourConfig = config.Bind("Config", "List Behaviour", ListBehaviour.BlackList, "What mode to use to filter what items will get new icons");
                 
-        _blacklistConfig = config.Bind("Config", "BlacklistConfig", "Body,",
-            "List of items to not replace icons");
+        _itemListConfig = config.Bind("Config", "Item List", "Body,", "List of items to filter");
 
         _rotationOverridesConfig = config.Bind("Rotations", "Manual Rotation", "Rubber Ducky:25,-135,0|Airhorn:-45,90,-80|Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90",
             "Dictionary of alternate rotations for items\nListSeparator=|");
         
         ParseBlacklist();
-        _blacklistConfig.SettingChanged += (_, _) => ParseBlacklist();
+        _itemListConfig.SettingChanged += (_, _) => ParseBlacklist();
                 
         ParseFileOverrides();
         _fileOverridesConfig.SettingChanged += (_, _) => ParseFileOverrides();
@@ -58,7 +61,7 @@ internal static class PluginConfig
         {
             LethalConfigProxy.AddConfig(_verboseMeshLogs);
             
-            LethalConfigProxy.AddConfig(_blacklistConfig);
+            LethalConfigProxy.AddConfig(_itemListConfig);
             LethalConfigProxy.AddConfig(_fileOverridesConfig);
             LethalConfigProxy.AddConfig(_rotationOverridesConfig);
                     
@@ -151,9 +154,9 @@ internal static class PluginConfig
 
         void ParseBlacklist()
         {
-            var items = _blacklistConfig.Value.Split(",");
+            var items = _itemListConfig.Value.Split(",");
 
-            Blacklist = items.Select(s => s.Trim()).Where(s => !s.IsNullOrWhiteSpace()).ToHashSet();
+            ItemList = items.Select(s => s.Trim()).Where(s => !s.IsNullOrWhiteSpace()).ToHashSet();
         }
 
         void ParseFileOverrides()
@@ -191,6 +194,13 @@ internal static class PluginConfig
 
                 });
         }
+    }
+
+    public enum ListBehaviour
+    {
+        None,
+        BlackList,
+        WhiteList
     }
 
 

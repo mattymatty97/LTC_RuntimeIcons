@@ -43,9 +43,13 @@ public static class GrabbableObjectPatch
             BrokenSprite = Object.Instantiate(__instance.itemProperties.itemIcon);
             BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
         }
-        
-        if (PluginConfig.Blacklist.Contains(__instance.itemProperties.itemName))
-            return;
+
+        var inList = PluginConfig.ItemList.Contains(__instance.itemProperties.itemName);
+        if (PluginConfig.ItemListBehaviour != PluginConfig.ListBehaviour.None)
+        {
+            if (inList == (PluginConfig.ItemListBehaviour == PluginConfig.ListBehaviour.BlackList))
+                return;
+        }
         
         if (_pendingObjects.TryGetValue(__instance.itemProperties, out var previousObject) && previousObject)
             return;
