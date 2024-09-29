@@ -45,20 +45,15 @@ public static class GrabbableObjectPatch
         }
 
         var inList = PluginConfig.ItemList.Contains(__instance.itemProperties.itemName);
-        switch (PluginConfig.ItemListBehaviour)
-        {
-            case PluginConfig.ListBehaviour.BlackList:
-                if (inList)
-                    return;
-                break;
-            case PluginConfig.ListBehaviour.WhiteList:
-                if (!inList)
-                    return;
-                break;
-            case PluginConfig.ListBehaviour.None:
-            default:
-                break;
-        }
+        
+        if (PluginConfig.ItemListBehaviour switch
+            {
+                PluginConfig.ListBehaviour.BlackList => inList,
+                PluginConfig.ListBehaviour.WhiteList => !inList,
+                PluginConfig.ListBehaviour.None => false,
+                _ => false
+            })
+            return;
         
         if (_pendingObjects.TryGetValue(__instance.itemProperties, out var previousObject) && previousObject)
             return;
