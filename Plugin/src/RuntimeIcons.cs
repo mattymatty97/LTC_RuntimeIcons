@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using MonoMod.RuntimeDetour;
 using RuntimeIcons.Components;
+using RuntimeIcons.Config;
 using RuntimeIcons.Dependency;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
@@ -16,7 +17,7 @@ namespace RuntimeIcons
     [BepInDependency("com.github.lethalcompanymodding.vertexlibrary", "0.0.2")]
     [BepInDependency("BMX.LobbyCompatibility", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ainavt.lc.lethalconfig", Flags: BepInDependency.DependencyFlags.SoftDependency)]
-    internal class RuntimeIcons : BaseUnityPlugin
+    public class RuntimeIcons : BaseUnityPlugin
     {
         internal static readonly ISet<Hook> Hooks = new HashSet<Hook>();
         internal static readonly Harmony Harmony = new Harmony(GUID);

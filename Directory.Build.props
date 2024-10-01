@@ -3,13 +3,13 @@
     
 	<PropertyGroup>
 		<!-- Common Versioning and Module Information -->
-		<Version>1.0.0.0</Version>
+		<Version>0.0.1</Version>
 		<ModName>RuntimeIcons</ModName>
 		<ModGUID>mattymatty.RuntimeIcons</ModGUID>
         <ModNameSpace>$(ModName)</ModNameSpace>
 		<AssemblyVersion>$(Version)</AssemblyVersion>
 		<FileVersion>$(Version)</FileVersion>
-		<InformationalVersion>$(Version)-beta</InformationalVersion>
+		<InformationalVersion>$(Version)</InformationalVersion>
 
 		<!-- Construct Assembly Title from ModName -->
 		<AssemblyTitle>$(ModName) - My Assembly Title</AssemblyTitle>

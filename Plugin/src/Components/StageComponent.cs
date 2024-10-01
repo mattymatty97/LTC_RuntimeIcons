@@ -169,8 +169,6 @@ public class StageComponent : MonoBehaviour
         if (StagedTransform && StagedTransform != targetTransform)
             throw new InvalidOperationException("An Object is already on stage!");
         
-        RuntimeIcons.Log.LogInfo($"Setting stage for {targetTransform.name}");
-        
         PivotTransform.parent = null;
         PivotTransform.position = Vector3.zero;
         PivotTransform.rotation = Quaternion.identity;
@@ -207,9 +205,25 @@ public class StageComponent : MonoBehaviour
         
         StagedTransform.localPosition = -bounds.center;
         
-        RuntimeIcons.Log.LogInfo($"StagedObject offset {StagedTransform.localPosition} rotation {StagedTransform.localRotation.eulerAngles}");
     }
 
+    public void PrepareCameraForShot(Vector3 offset, float fov)
+    {
+        if (!StagedTransform)
+            throw new InvalidOperationException("No Object on stage!");
+        
+        PivotTransform.position = _camera.transform.position + offset;
+        LightTransform.position = PivotTransform.position;
+        if (_camera.orthographic)
+        {
+            _camera.orthographicSize = fov;
+        }
+        else
+        {
+            _camera.fieldOfView = fov;
+        }
+    }
+    
     public void PrepareCameraForShot()
     {
         if (!StagedTransform)

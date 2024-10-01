@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using BepInEx;
 using HarmonyLib;
 using RuntimeIcons.Components;
+using RuntimeIcons.Config;
 using RuntimeIcons.Utils;
 using UnityEngine;
 using VertexLibrary;
@@ -91,10 +92,10 @@ public static class GrabbableObjectPatch
                     var texture = new Texture2D(128, 128);
                     texture.LoadImage(fileData);
 
-                    if (texture.width != 128 || texture.height != 128)
+                    if (texture.width != texture.height)
                     {
                         Object.Destroy(texture);
-                        RuntimeIcons.Log.LogError($"Expected Icon {filename} has the wrong format!");
+                        RuntimeIcons.Log.LogError($"Expected Icon {filename} was not square!");
                     }
                     else if (!texture.IsTransparent())
                     {
@@ -102,6 +103,8 @@ public static class GrabbableObjectPatch
                             new Vector2(texture.width / 2f, texture.height / 2f));
                         sprite.name = $"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}";
                         grabbableObject.itemProperties.itemIcon = sprite;
+                        UpdateIconsInHUD(grabbableObject.itemProperties);
+                        RuntimeIcons.Log.LogInfo($"{grabbableObject.itemProperties.itemName} now has a new icon | 1");
                         return;
                     }
                 }
@@ -116,29 +119,39 @@ public static class GrabbableObjectPatch
             }
         }
 
+        var stage = RuntimeIcons.CameraStage;
         try
         {
             var rotation = Quaternion.Euler(grabbableObject.itemProperties.restingRotation.x, grabbableObject.itemProperties.floorYOffset + 90f, grabbableObject.itemProperties.restingRotation.z);
             
-            RuntimeIcons.CameraStage.SetObjectOnStage(grabbableObject.NetworkObject.gameObject);
+            RuntimeIcons.Log.LogInfo($"Setting stage for {grabbableObject.NetworkObject.gameObject.name}");
             
-            RuntimeIcons.CameraStage.CenterObjectOnPivot(rotation);
+            stage.SetObjectOnStage(grabbableObject.NetworkObject.gameObject);
+            
+            stage.CenterObjectOnPivot(rotation);
+            
+            RuntimeIcons.Log.LogInfo($"StagedObject offset {stage.StagedTransform.localPosition} rotation {stage.StagedTransform.localRotation.eulerAngles}");
 
-            FindOptimalRotation(RuntimeIcons.CameraStage, grabbableObject);
-                
-            RuntimeIcons.CameraStage.PrepareCameraForShot();
+            FindOptimalRotation(stage, grabbableObject);
+            
+            RuntimeIcons.Log.LogInfo($"Stage rotation {stage.PivotTransform.rotation.eulerAngles}");
+            
+            stage.PrepareCameraForShot();
 
-            var texture = RuntimeIcons.CameraStage.TakeSnapshot();
+            var texture = stage.TakeSnapshot();
 
             // UnPremultiply the texture
             texture.UnPremultiply();
             texture.Apply();
-
-            texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
-                Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
             
-            texture.SaveEXR($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
-                Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR"));
+            if (PluginConfig.DumpToCache)
+            {
+                texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
+                    Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
+
+                texture.SaveEXR($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
+                    Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR"));
+            }
             
             if (!texture.IsTransparent())
             {
@@ -146,6 +159,7 @@ public static class GrabbableObjectPatch
                     new Vector2(texture.width / 2f, texture.height / 2f));
                 sprite.name = $"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}";
                 grabbableObject.itemProperties.itemIcon = sprite;
+                RuntimeIcons.Log.LogInfo($"{grabbableObject.itemProperties.itemName} now has a new icon | 2");
             }
             else
             {
@@ -157,9 +171,7 @@ public static class GrabbableObjectPatch
         }
         finally
         {
-            RuntimeIcons.Log.LogInfo($"{grabbableObject.itemProperties.itemName} now has a new icon");
-            //RuntimeIcons.CameraStage.ResetStage();
-            RuntimeIcons.CameraStage.ResetStage();
+            stage.ResetStage();
         }
     }
 
@@ -256,7 +268,6 @@ public static class GrabbableObjectPatch
             }
         }
 
-        RuntimeIcons.Log.LogInfo($"Stage rotation {pivotTransform.rotation.eulerAngles}");
     }
 
     private static void UpdateIconsInHUD(Item item)
