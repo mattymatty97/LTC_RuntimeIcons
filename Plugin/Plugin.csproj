@@ -9,8 +9,6 @@
     <PropertyGroup>
         <!-- The mod directory to install our developement mod to. -->
         <ModDirectory>$(ProfileDirectory)\BepInEx\plugins\0-$(Product)\</ModDirectory>
-        <!-- Where to create the temporary directory for creating the release zip files. -->
-        <ZipDir>$(SolutionDir)\Thunderstore\</ZipDir>
         <!-- The internal structure of the zip file. -->
         <ZipStructure>BepInEx\plugins\</ZipStructure>
     </PropertyGroup>

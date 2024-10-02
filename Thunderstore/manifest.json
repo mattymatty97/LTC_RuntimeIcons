@@ -1,10 +1,10 @@
 {
   "name": "RuntimeIcons",
-  "version_number": "1.0.0",
+  "version_number": "0.1.1",
   "website_url": "https://github.com/mattymatty97/LTC_RuntimeIcons",
   "description": "WIP.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",
-    "mattymatty-Matty_Fixes_Experimental-1.1.22"
+    "LethalCompanyModding-VertexLibrary-1.0.0"
   ]
 }

@@ -14,7 +14,7 @@ using LogType = VertexLibrary.LogType;
 namespace RuntimeIcons
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.github.lethalcompanymodding.vertexlibrary", "0.0.2")]
+    [BepInDependency("com.github.lethalcompanymodding.vertexlibrary", "1.0.0")]
     [BepInDependency("BMX.LobbyCompatibility", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ainavt.lc.lethalconfig", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     public class RuntimeIcons : BaseUnityPlugin
