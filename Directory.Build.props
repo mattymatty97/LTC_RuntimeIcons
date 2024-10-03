@@ -3,7 +3,7 @@
     
 	<PropertyGroup>
 		<!-- Common Versioning and Module Information -->
-		<Version>0.1.2</Version>
+		<Version>0.1.3</Version>
 		<ModName>RuntimeIcons</ModName>
 		<ModGUID>mattymatty.RuntimeIcons</ModGUID>
         <ModNameSpace>$(ModName)</ModNameSpace>
