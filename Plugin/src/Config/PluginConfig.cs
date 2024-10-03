@@ -18,6 +18,7 @@ internal static class PluginConfig
 
     internal static LogLevel VerboseMeshLogs => _verboseMeshLogs.Value;
     internal static bool DumpToCache => _dumpToCache.Value;
+    internal static float TransparencyRatio => _failPercentage.Value;
     internal static ISet<string> ItemList { get; private set; }
     internal static ListBehaviour ItemListBehaviour => _itemListBehaviourConfig.Value;
 
@@ -25,9 +26,10 @@ internal static class PluginConfig
     internal static IDictionary<string, string> FileOverrides { get; private set; }
 
     private static ConfigEntry<string> _rotationOverridesConfig; 
+    private static ConfigEntry<string> _fileOverridesConfig;
     private static ConfigEntry<ListBehaviour> _itemListBehaviourConfig;
     private static ConfigEntry<string> _itemListConfig;
-    private static ConfigEntry<string> _fileOverridesConfig;
+    private static ConfigEntry<float> _failPercentage;
     private static ConfigEntry<LogLevel> _verboseMeshLogs;
     private static ConfigEntry<bool> _dumpToCache;
 
@@ -49,6 +51,8 @@ internal static class PluginConfig
                 
         _itemListConfig = config.Bind("Config", "Item List", "Body,", "List of items to filter");
         
+        _failPercentage = config.Bind("Config", "Transparency Threshold", 0.95f, new ConfigDescription("Maximum percentage of transparent pixels to consider a valid image", new AcceptableValueRange<float>(0f, 1f)));
+        
         
         ParseBlacklist();
         _itemListConfig.SettingChanged += (_, _) => ParseBlacklist();
@@ -62,8 +66,12 @@ internal static class PluginConfig
         if (LethalConfigProxy.Enabled)
         {
             LethalConfigProxy.AddConfig(_verboseMeshLogs);
+            LethalConfigProxy.AddConfig(_dumpToCache);
             
             LethalConfigProxy.AddConfig(_itemListConfig);
+            LethalConfigProxy.AddConfig(_itemListBehaviourConfig);
+            LethalConfigProxy.AddConfig(_failPercentage);
+            
             LethalConfigProxy.AddConfig(_fileOverridesConfig);
             LethalConfigProxy.AddConfig(_rotationOverridesConfig);
                     

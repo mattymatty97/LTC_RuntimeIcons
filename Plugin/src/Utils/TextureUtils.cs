@@ -109,4 +109,14 @@ public static class TextureUtils
                 return false;
         return true;
     }
+    
+    public static long GetTransparentCount(this Texture2D tex)
+    {
+        var count = 0;
+        for (var x = 0; x < tex.width; x++)
+        for (var y = 0; y < tex.height; y++)
+            if (tex.GetPixel(x, y).a == 0)
+                count++;
+        return count;
+    }
 }

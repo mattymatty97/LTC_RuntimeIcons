@@ -173,8 +173,12 @@ public static class GrabbableObjectPatch
                 texture.SaveEXR($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
                     Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR"));
             }
+
+            var transparentCount = texture.GetTransparentCount();
+            var totalPixels = texture.width * texture.height;
+            var ratio = (float)transparentCount / (float)totalPixels;
             
-            if (!texture.IsTransparent())
+            if (ratio <= PluginConfig.TransparencyRatio)
             {
                 var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
                     new Vector2(texture.width / 2f, texture.height / 2f));
@@ -184,7 +188,7 @@ public static class GrabbableObjectPatch
             }
             else
             {
-                RuntimeIcons.Log.LogError($"{grabbableObject.itemProperties.itemName} Generated Empty Sprite!");
+                RuntimeIcons.Log.LogError($"{grabbableObject.itemProperties.itemName} Generated {ratio*100}% Empty Sprite!");
                 grabbableObject.itemProperties.itemIcon = BrokenSprite;
             }
 
