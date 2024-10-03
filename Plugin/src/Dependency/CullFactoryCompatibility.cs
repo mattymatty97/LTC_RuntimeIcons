@@ -1,5 +1,7 @@
-﻿using CullFactory.Behaviours.API;
+﻿using System;
 using System.Runtime.CompilerServices;
+using BepInEx.Bootstrap;
+using CullFactory.Behaviours.API;
 using UnityEngine;
 
 namespace RuntimeIcons.Dependency;
@@ -7,6 +9,7 @@ namespace RuntimeIcons.Dependency;
 internal class CullFactoryCompatibility
 {
     public const string GUID = "com.fumiko.CullFactory";
+    public const string VERSION = "1.4.0";
 
     private static bool? _enabled;
 
@@ -14,7 +17,14 @@ internal class CullFactoryCompatibility
     {
         get
         {
-            _enabled ??= BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(GUID);
+            if (!_enabled.HasValue)
+            {
+                if (Chainloader.PluginInfos.TryGetValue(GUID, out var mod) &&
+                    mod.Metadata.Version >= Version.Parse(VERSION))
+                    _enabled = true;
+                else
+                    _enabled = false;
+            }
             return _enabled.Value;
         }
     }
@@ -27,7 +37,7 @@ internal class CullFactoryCompatibility
         DisableCullingForCameraImpl(camera);
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     private static void DisableCullingForCameraImpl(Camera camera)
     {
         var cullingOptions = camera.gameObject.AddComponent<CameraCullingOptions>();
