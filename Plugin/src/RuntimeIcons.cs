@@ -17,6 +17,7 @@ namespace RuntimeIcons
     [BepInDependency("com.github.lethalcompanymodding.vertexlibrary", "1.0.0")]
     [BepInDependency("BMX.LobbyCompatibility", Flags: BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ainavt.lc.lethalconfig", Flags: BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(CullFactoryCompatibility.GUID, Flags: BepInDependency.DependencyFlags.SoftDependency)]
     public class RuntimeIcons : BaseUnityPlugin
     {
         internal static readonly ISet<Hook> Hooks = new HashSet<Hook>();

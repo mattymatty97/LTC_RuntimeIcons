@@ -47,6 +47,7 @@
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ParticleSystemModule.dll" Publicize="false" Private="False"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false" Private="False"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Publicize="false" Private="False"/>
+        <Reference Include="$(SolutionDir)\Dependencies\CullFactory.dll" Publicize="false" Private="False"/>
         <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false" Private="False"/>
         <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false" Private="False"/>
         <Reference Include="$(SolutionDir)\Dependencies\VertexLibrary.dll" Publicize="false" Private="False"/>

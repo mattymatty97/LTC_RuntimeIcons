@@ -1,3 +1,4 @@
+using RuntimeIcons.Dependency;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -113,6 +114,8 @@ public class StageComponent : MonoBehaviour
         // Add a Camera component to the GameObject
         var cam = cameraGo.AddComponent<Camera>();
         stageComponent._camera = cam;
+
+        CullFactoryCompatibility.DisableCullingForCamera(cam);
 
         // Configure the Camera
         cam.cullingMask = cameraLayerMask;
