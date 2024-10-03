@@ -18,6 +18,7 @@ public static class GrabbableObjectPatch
 {
 
     public static Sprite BrokenSprite { get; private set; }
+    public static Sprite BrokenSprite2 { get; private set; }
 
     internal static bool ItemHasIcon(Item item)
     {
@@ -29,8 +30,6 @@ public static class GrabbableObjectPatch
             return false;
         return true;
     }
-
-    private static ConditionalWeakTable<Item, GrabbableObject> _pendingObjects = [];
     
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
@@ -44,6 +43,12 @@ public static class GrabbableObjectPatch
             BrokenSprite = Object.Instantiate(__instance.itemProperties.itemIcon);
             BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon";
         }
+        
+        if (!BrokenSprite2 && __instance.itemProperties.itemIcon)
+        {
+            BrokenSprite2 = Object.Instantiate(__instance.itemProperties.itemIcon);
+            BrokenSprite.name = $"{nameof(RuntimeIcons)}.ScrapItemIcon2";
+        }
 
         var inList = PluginConfig.ItemList.Contains(__instance.itemProperties.itemName);
         
@@ -56,11 +61,6 @@ public static class GrabbableObjectPatch
             })
             return;
         
-        if (_pendingObjects.TryGetValue(__instance.itemProperties, out var previousObject) && previousObject)
-            return;
-
-        _pendingObjects.AddOrUpdate(__instance.itemProperties, __instance);
-
         __instance.StartCoroutine(ComputeSpriteCoroutine(__instance));
     }
 
@@ -69,8 +69,29 @@ public static class GrabbableObjectPatch
         //wait two frames for the animations to settle
         yield return null;
         yield return null;
+        
+        if (ItemHasIcon(@this.itemProperties))
+            yield break;
+        
         ComputeSprite(@this);
-        _pendingObjects.Remove(@this.itemProperties);
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.EquipItem))]
+    private static void OnGrab(GrabbableObject __instance)
+    {
+        if (!__instance.IsOwner)
+            return;
+        
+        if (__instance.itemProperties.itemIcon != BrokenSprite)
+            return;
+        
+        RuntimeIcons.Log.LogInfo($"Attempting to refresh BrokenIcon for {__instance.itemProperties.itemName}!");
+        
+        ComputeSprite(__instance);
+
+        if (__instance.itemProperties.itemIcon == BrokenSprite)
+            __instance.itemProperties.itemIcon = BrokenSprite2;
     }
     
 
