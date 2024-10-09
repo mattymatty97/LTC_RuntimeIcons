@@ -16,6 +16,8 @@
     <ItemGroup>
         <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.0.1"/>
         <PackageReference Include="AinaVT-LethalConfig" Version="1.4.3" />
+        <PackageReference Include="LethalCompanyModding-VertexLibrary" Version="1.0.0" />
+        <PackageReference Include="fumiko-CullFactory" Version="1.4.2" />
         
         <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
         <!--<Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
@@ -26,7 +28,7 @@
     </ItemGroup>
     
 
-    <Target Name="DownloadDependencies" BeforeTargets="BeforeBuild">
+    <!--<Target Name="DownloadDependencies" BeforeTargets="BeforeBuild">
         <ItemGroup>
             <Dependencies Include="https://github.com/2394425147/LC_CullFactory/releases/latest/download/CullFactory.dll"/>
             <Dependencies Include="https://github.com/LethalCompanyModding/UnityVertexLibrary/releases/latest/download/VertexLibrary.dll"/>
@@ -40,7 +42,7 @@
             <Output TaskParameter="DownloadedFile" ItemName="Content" />
         </DownloadFile>
         <Message Importance="high" Text="All Dependencies are up to date"/>
-    </Target>
+    </Target>-->
 	
     <!-- Defining the reference files that have to be publicized. -->
     <ItemGroup>
