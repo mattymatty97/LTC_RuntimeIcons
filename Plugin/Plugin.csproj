@@ -15,6 +15,7 @@
 	
     <ItemGroup>
         <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.0.1"/>
+        <PackageReference Include="AinaVT-LethalConfig" Version="1.4.3" />
         
         <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
         <!--<Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
@@ -23,6 +24,23 @@
         <Reference Include="$(ProfileDirectory)\BepInEx\core\0Harmony.dll"/>
         <Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.Harmony.dll"/>-->
     </ItemGroup>
+    
+
+    <Target Name="DownloadDependencies" BeforeTargets="BeforeBuild">
+        <ItemGroup>
+            <Dependencies Include="https://github.com/2394425147/LC_CullFactory/releases/latest/download/CullFactory.dll"/>
+            <Dependencies Include="https://github.com/LethalCompanyModding/UnityVertexLibrary/releases/latest/download/VertexLibrary.dll"/>
+        </ItemGroup>
+        
+        <Message Importance="high" Text="Downloading Dependencies"/>
+        <DownloadFile
+                SourceUrl="%(Dependencies.Identity)"
+                DestinationFolder="$(SolutionDir)\Dependencies\"
+                ContinueOnError="WarnAndContinue">
+            <Output TaskParameter="DownloadedFile" ItemName="Content" />
+        </DownloadFile>
+        <Message Importance="high" Text="All Dependencies are up to date"/>
+    </Target>
 	
     <!-- Defining the reference files that have to be publicized. -->
     <ItemGroup>
@@ -48,10 +66,10 @@
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false" Private="False"/>
         <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Publicize="false" Private="False"/>
         <Reference Include="$(SolutionDir)\Dependencies\CullFactory.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(SolutionDir)\Dependencies\LethalConfig.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(SolutionDir)\Dependencies\MattyFixes.dll" Publicize="false" Private="False"/>
         <Reference Include="$(SolutionDir)\Dependencies\VertexLibrary.dll" Publicize="false" Private="False"/>
     </ItemGroup>
+    
+    
 	
 	<!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
         <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>

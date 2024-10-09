@@ -44,7 +44,7 @@ internal static class PluginConfig
         _fileOverridesConfig = config.Bind("Overrides", "Manual Files", "",
             "Dictionary of files to use for specific items");
         
-        _rotationOverridesConfig = config.Bind("Overrides", "Manual Rotation", "Rubber Ducky:25,-135,0|Airhorn:-45,90,-80|Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90",
+        _rotationOverridesConfig = config.Bind("Overrides", "Manual Rotation", "Airhorn:-45,90,-80|Whoopie cushion:-75,0,0|Toy robot:-15,180,0|Sticky note:0,105,-90",
                                                "Dictionary of alternate rotations for items\nListSeparator=|");
         
         _itemListBehaviourConfig = config.Bind("Config", "List Behaviour", ListBehaviour.BlackList, "What mode to use to filter what items will get new icons");
