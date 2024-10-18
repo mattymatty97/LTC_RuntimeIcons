@@ -5,33 +5,42 @@
         <AssemblyName>$(ModName)</AssemblyName>
         <Product>$(ModName)</Product>
     </PropertyGroup>
-	
+
     <PropertyGroup>
         <!-- The mod directory to install our developement mod to. -->
         <ModDirectory>$(ProfileDirectory)\BepInEx\plugins\0-$(Product)\</ModDirectory>
         <!-- The internal structure of the zip file. -->
         <ZipStructure>BepInEx\plugins\</ZipStructure>
     </PropertyGroup>
-	
+
     <ItemGroup>
-        <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.0.1"/>
+        <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.0.1" />
         <PackageReference Include="AinaVT-LethalConfig" Version="1.4.3" />
         <PackageReference Include="LethalCompanyModding-VertexLibrary" Version="1.0.0" />
         <PackageReference Include="fumiko-CullFactory" Version="1.4.2" />
-        
-        <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
-        <!--<Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
+
+        <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+
+        <PackageReference
+            Include="LethalCompany.GameLibs.Steam"
+            Version="64.0.0-ngd.0"
+        />
+
+        <!--<Reference
+        Include="$(ProfileDirectory)\BepInEx\core\BepInEx.dll"/>
         <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.dll"/>
         <Reference Include="$(ProfileDirectory)\BepInEx\core\Mono.Cecil.Rocks.dll"/>
         <Reference Include="$(ProfileDirectory)\BepInEx\core\0Harmony.dll"/>
         <Reference Include="$(ProfileDirectory)\BepInEx\core\BepInEx.Harmony.dll"/>-->
     </ItemGroup>
-    
 
-    <!--<Target Name="DownloadDependencies" BeforeTargets="BeforeBuild">
+    <!--<Target
+    Name="DownloadDependencies" BeforeTargets="BeforeBuild">
         <ItemGroup>
-            <Dependencies Include="https://github.com/2394425147/LC_CullFactory/releases/latest/download/CullFactory.dll"/>
-            <Dependencies Include="https://github.com/LethalCompanyModding/UnityVertexLibrary/releases/latest/download/VertexLibrary.dll"/>
+            <Dependencies
+    Include="https://github.com/2394425147/LC_CullFactory/releases/latest/download/CullFactory.dll"/>
+            <Dependencies
+    Include="https://github.com/LethalCompanyModding/UnityVertexLibrary/releases/latest/download/VertexLibrary.dll"/>
         </ItemGroup>
         
         <Message Importance="high" Text="Downloading Dependencies"/>
@@ -43,37 +52,16 @@
         </DownloadFile>
         <Message Importance="high" Text="All Dependencies are up to date"/>
     </Target>-->
-	
+
     <!-- Defining the reference files that have to be publicized. -->
     <ItemGroup>
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
-
-        <!-- Publicize directly when referencing -->
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp.dll" Publicize="true" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Assembly-CSharp-firstpass.dll" Publicize="true" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Runtime.dll" Publicize="true" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Netcode.Components.dll" Publicize="true" Private="False"/>
-        <!--<Reference Include="$(SolutionDir)\Dependencies\Assembly-CSharp.pdll" Publicize="true"/>-->
-
-        <!-- clean referencing -->
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.Mathematics.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.TextMeshPro.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.PhysicsModule.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.UI.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.AnimationModule.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ImageConversionModule.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\UnityEngine.ParticleSystemModule.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.HighDefinition.Runtime.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(GameDirectory)\Lethal Company_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(SolutionDir)\Dependencies\CullFactory.dll" Publicize="false" Private="False"/>
-        <Reference Include="$(SolutionDir)\Dependencies\VertexLibrary.dll" Publicize="false" Private="False"/>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1"
+            PrivateAssets="all" />
     </ItemGroup>
-    
-    
-	
-	<!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
-        <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
+
+
+    <!--    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
+        <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot;
+    @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
     </Target>-->
 </Project>
