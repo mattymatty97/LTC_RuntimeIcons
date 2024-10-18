@@ -48,9 +48,9 @@
       },
       "LethalCompanyModding-VertexLibrary": {
         "type": "Direct",
-        "requested": "[1.0.0, )",
-        "resolved": "1.0.0",
-        "contentHash": "qQ6cM3o14oszs77TapqadaqbAuLHSkgxidnIjQKKFJfVEemZUlH+Qyq3tI8nsALwcBIRFwRwd6MMLeQXcCNrkA=="
+        "requested": "[1.1.0, )",
+        "resolved": "1.1.0",
+        "contentHash": "arx9xKGWLf5/2tAi8MGTJV5Ecyhm5eu9nPhFKeA/YPSB9rM5GE5+d2T3u85BtcppKYR8C4b6h+jexiZoPPHxoA=="
       },
       "TeamBMX.LobbyCompatibility": {
         "type": "Direct",
