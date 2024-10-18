@@ -1,19 +1,18 @@
 <Project>
-
-
+    
     <PropertyGroup>
         <!-- Common Versioning and Module Information -->
         <Version>0.1.4</Version>
         <ModName>RuntimeIcons</ModName>
-        <ModGUID>mattymatty.RuntimeIcons</ModGUID>
+        <ModGUID>com.github.lethalcompanymodding.runtimeicons</ModGUID>
         <ModNameSpace>$(ModName)</ModNameSpace>
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(Version)</FileVersion>
         <InformationalVersion>$(Version)</InformationalVersion>
 
         <!-- Construct Assembly Title from ModName -->
-        <AssemblyTitle>$(ModName) - My Assembly Title</AssemblyTitle>
-        <AssemblyDescription>This is a sample assembly.</AssemblyDescription>
+        <AssemblyTitle>$(ModName) - Plugin</AssemblyTitle>
+        <AssemblyDescription>Generate Icons for scrap at runtime, replacing the gear icon.</AssemblyDescription>
 
         <!-- Assembly Metadata -->
         <AssemblyConfiguration>Release</AssemblyConfiguration>
