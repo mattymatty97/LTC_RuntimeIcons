@@ -2,7 +2,7 @@
   "name": "RuntimeIcons",
   "version_number": "0.1.4",
   "website_url": "https://github.com/mattymatty97/LTC_RuntimeIcons",
-  "description": "WIP.",
+  "description": "Generate Icons for scrap at runtime, replacing the gear icon.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",
     "LethalCompanyModding-VertexLibrary-1.0.0"

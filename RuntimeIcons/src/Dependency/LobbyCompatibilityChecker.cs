@@ -1,4 +1,6 @@
+using System;
 using System.Runtime.CompilerServices;
+using BepInEx.Bootstrap;
 using LobbyCompatibility.Enums;
 using LobbyCompatibility.Features;
 
@@ -12,7 +14,7 @@ namespace RuntimeIcons.Dependency
         {
             get
             {
-                _enabled ??= BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("BMX.LobbyCompatibility");
+                _enabled ??= Chainloader.PluginInfos.ContainsKey("BMX.LobbyCompatibility");
                 return _enabled.Value;
             }
         }
@@ -20,7 +22,7 @@ namespace RuntimeIcons.Dependency
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static void Init()
         {
-            PluginHelper.RegisterPlugin(RuntimeIcons.GUID, System.Version.Parse(RuntimeIcons.VERSION), CompatibilityLevel.Everyone, VersionStrictness.Minor);
+            PluginHelper.RegisterPlugin(RuntimeIcons.GUID, Version.Parse(RuntimeIcons.VERSION), CompatibilityLevel.Everyone, VersionStrictness.Minor);
         }
         
     }
