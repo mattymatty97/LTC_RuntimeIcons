@@ -44,4 +44,15 @@
         <BepInExPluginGuid>$(ModGUID)</BepInExPluginGuid>
         <BepInExPluginName>$(ModName)</BepInExPluginName>
     </PropertyGroup>
+
+    <!-- Thunderstore Publish Profile Follows:-->
+    <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+        <LangVersion>latest</LangVersion>
+        <PublishProfile>Thunderstore</PublishProfile>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    </PropertyGroup>
+
 </Project>
