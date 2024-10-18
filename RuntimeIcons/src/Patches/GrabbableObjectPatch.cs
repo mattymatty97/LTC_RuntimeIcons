@@ -22,7 +22,7 @@ public static class GrabbableObjectPatch
 
     internal static bool ItemHasIcon(Item item)
     {
-        if (item.itemIcon == null)
+        if (!item.itemIcon)
             return false;
         if (item.itemIcon.name == "ScrapItemIcon")
             return false;
