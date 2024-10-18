@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -65,10 +66,15 @@ namespace RuntimeIcons.Dependency
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static void AddConfig<T>(ConfigEntry<T> entry, bool requiresRestart = false) where T : Enum
         {
+            BaseOptions.CanModifyDelegate callback = () => (true, null);
+
+            if (entry.SettingType.GetCustomAttributes(typeof(FlagsAttribute), true).Any())
+                callback = () => (false, "THIS IS A FLAG TYPE ENUM, EDITING CURRENTLY NOT SUPPORTED!");
+            
             LethalConfigManager.AddConfigItem(new EnumDropDownConfigItem<T>(entry, new EnumDropDownOptions()
             {
                 RequiresRestart = requiresRestart,
-                CanModifyCallback = () => (false, "THIS IS A FLAG TYPE ENUM, EDITING CURRENTLY NOT SUPPORTED!")
+                CanModifyCallback = callback
             }));
         }
         

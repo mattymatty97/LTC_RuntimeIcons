@@ -17,17 +17,17 @@ internal static class RotationEditor
         {
             var configFile = new ConfigFile(Path.GetTempFileName(), false, MetadataHelper.GetMetadata(RuntimeIcons.INSTANCE));
 
-            var eulerAngles = configFile.Bind("Rotation Editor", "Euler Angles", "0,0,0", "The Euler angles representing this rotation");
+            var eulerAngles = configFile.Bind("Rotation Calculator", "Euler Angles", "0,0,0", "The Euler angles representing this rotation");
                 
-            var angle = configFile.Bind("Rotation Editor", "Angle", 0.0f, new ConfigDescription("rotation angle", new AcceptableValueRange<float>(-360, 360)));
+            var angle = configFile.Bind("Rotation Calculator", "Angle", 0.0f, new ConfigDescription("rotation angle", new AcceptableValueRange<float>(-360, 360)));
                 
             LethalConfigProxy.AddConfig(eulerAngles);
             LethalConfigProxy.AddConfig(angle);
-            LethalConfigProxy.AddButton("Rotation Editor", "Apply X Rotation", "translate current EulerAngles around world X Axis by Rotation amount", "X Rot",
+            LethalConfigProxy.AddButton("Rotation Calculator", "Apply X Rotation", "translate current EulerAngles around world X Axis by Rotation amount", "X Rot",
                 () => ApplyRotation(angle.Value, Vector3.right));
-            LethalConfigProxy.AddButton("Rotation Editor", "Apply Y Rotation", "translate current EulerAngles around world X Axis by Rotation amount", "Y Rot",
+            LethalConfigProxy.AddButton("Rotation Calculator", "Apply Y Rotation", "translate current EulerAngles around world X Axis by Rotation amount", "Y Rot",
                 () => ApplyRotation(angle.Value, Vector3.up));
-            LethalConfigProxy.AddButton("Rotation Editor", "Apply Z Rotation", "translate current EulerAngles around world X Axis by Rotation amount", "Z Rot",
+            LethalConfigProxy.AddButton("Rotation Calculator", "Apply Z Rotation", "translate current EulerAngles around world X Axis by Rotation amount", "Z Rot",
                 () => ApplyRotation(angle.Value, Vector3.forward));
                 
             return;
