@@ -70,6 +70,9 @@ public static class GrabbableObjectPatch
         yield return null;
         yield return null;
         
+        //throttle renders to not hang the game
+        yield return new WaitUntil(()=>StartOfRoundPatch.AvailableRenders > 0);
+        
         if (ItemHasIcon(@this.itemProperties))
             yield break;
         
@@ -140,6 +143,9 @@ public static class GrabbableObjectPatch
             }
         }
 
+        //we're rendering!
+        StartOfRoundPatch.AvailableRenders--;
+        
         var stage = RuntimeIcons.CameraStage;
         try
         {
@@ -167,11 +173,31 @@ public static class GrabbableObjectPatch
             
             if (PluginConfig.DumpToCache)
             {
-                texture.SavePNG($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
-                    Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG"));
 
-                texture.SaveEXR($"{nameof(RuntimeIcons)}.{grabbableObject.itemProperties.itemName}",
-                    Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR"));
+                var outputName = grabbableObject.itemProperties.itemName;
+                var sanitizedName = String.Join("_",
+                        outputName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries))
+                    .TrimEnd('.');
+                
+                var subFolder = "";
+
+                if (StartOfRoundPatch.ItemModMap.TryGetValue(grabbableObject.itemProperties, out var modTag))
+                {
+                    if (!modTag.Item1.Equals("Vanilla"))
+                    {
+                        var sanitizedMod = String.Join("_",
+                                modTag.Item2.Split(Path.GetInvalidPathChars(), StringSplitOptions.RemoveEmptyEntries))
+                            .TrimEnd('.');
+                        
+                        subFolder = $"{modTag.Item1}{Path.DirectorySeparatorChar}{sanitizedMod}";
+                    }
+                }
+                
+                texture.SavePNG(sanitizedName,
+                    Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.PNG", subFolder));
+
+                texture.SaveEXR(sanitizedName,
+                    Path.Combine(Paths.CachePath, $"{nameof(RuntimeIcons)}.EXR", subFolder));
             }
 
             var transparentCount = texture.GetTransparentCount();

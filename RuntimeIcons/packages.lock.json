@@ -30,11 +30,23 @@
         "resolved": "2.1.0",
         "contentHash": "VCG3QRiqNdW9ku2FEcNsbK+HKxrZmW0VxwMNyLNO7h0xGorU+C6vBHN8Qq4eAL5fU11Uks5x2uoYdqEoKD3P8A=="
       },
+      "Evaisa-LethalLib": {
+        "type": "Direct",
+        "requested": "[0.16.1, )",
+        "resolved": "0.16.1",
+        "contentHash": "pVEQgCTz/+2ai4L9vCffk3ThlKlJq9/Px4oNc4PYoScajpaos4Xr1bbIWqoPMMdZLAcgGIY2lhZ+hH7es79H9g=="
+      },
       "fumiko-CullFactory": {
         "type": "Direct",
         "requested": "[1.4.2, )",
         "resolved": "1.4.2",
         "contentHash": "aW1Va8rAm1hePvLvqpjHDghi4ZD1wc3QvuWlgzbYj0reMIjFg758k4MmMDN5r05zDXL+NJd0A4wn7iQwTSi6aQ=="
+      },
+      "IAmBatby-LethalLevelLoader": {
+        "type": "Direct",
+        "requested": "[1.3.10, )",
+        "resolved": "1.3.10",
+        "contentHash": "SAccgaQQPq/Dp7ik2oBCk3TZxC+dD60TL5k9cqfUwB7zEZqoE03lGAc9EG2lstZKcW8BDBxfZLdVAbd12JR9Iw=="
       },
       "LethalCompany.GameLibs.Steam": {
         "type": "Direct",
